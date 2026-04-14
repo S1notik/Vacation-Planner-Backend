@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-04-14-create-vacation-requests" author="vacation-planner">
+        <createTable tableName="vacation_requests">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_vr_user"
+                             references="users(id)"
+                             deleteCascade="false"/>
+            </column>
+            <column name="team_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_vr_team"
+                             references="teams(id)"
+                             deleteCascade="false"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="text"/>
+            <column name="reviewed_by" type="uuid">
+                <constraints foreignKeyName="fk_vr_reviewer"
+                             references="users(id)"
+                             deleteCascade="false"/>
+            </column>
+            <column name="reviewed_at" type="timestamp"/>
+            <column name="created_at" type="timestamp" defaultValueComputed="now()"/>
+        </createTable>
+
+        <sql>ALTER TABLE vacation_requests ADD CONSTRAINT chk_vr_status
+            CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'))</sql>
+
+        <sql>ALTER TABLE vacation_requests ADD CONSTRAINT chk_vr_dates
+            CHECK (end_date >= start_date)</sql>
+
+        <createIndex tableName="vacation_requests" indexName="idx_vr_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        <createIndex tableName="vacation_requests" indexName="idx_vr_team_status">
+            <column name="team_id"/>
+            <column name="status"/>
+        </createIndex>
+        <createIndex tableName="vacation_requests" indexName="idx_vr_dates">
+            <column name="start_date"/>
+            <column name="end_date"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

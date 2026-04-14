@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-04-14-create-vacation-balance" author="vacation-planner">
+        <createTable tableName="vacation_balance">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_vacation_balance_user"
+                             references="users(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="year" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_days" type="int" defaultValueNumeric="28">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used_days" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="vacation_balance"
+                             columnNames="user_id, year"
+                             constraintName="uq_vacation_balance_user_year"/>
+
+        <sql>ALTER TABLE vacation_balance ADD CONSTRAINT chk_vacation_balance_days
+            CHECK (used_days >= 0 AND total_days >= 0 AND used_days &lt;= total_days)</sql>
+
+        <createIndex tableName="vacation_balance" indexName="idx_vacation_balance_user_id">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

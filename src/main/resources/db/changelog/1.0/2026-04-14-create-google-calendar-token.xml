@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-04-14-create-google-calendar-token" author="vacation-planner">
+        <createTable tableName="google_calendar_token">
+            <column name="id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"
+                             foreignKeyName="fk_gct_user"
+                             references="users(id)"
+                             deleteCascade="true"/>
+            </column>
+            <column name="entity_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_token" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refresh_token" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="calendar_id" type="varchar(255)"/>
+            <column name="connected_at" type="timestamp" defaultValueComputed="now()"/>
+        </createTable>
+
+        <sql>ALTER TABLE google_calendar_tokens ADD CONSTRAINT chk_gct_entity_type
+            CHECK (entity_type IN ('EMPLOYER', 'EMPLOYEE'))</sql>
+
+        <addUniqueConstraint tableName="google_calendar_tokens"
+                             columnNames="user_id, entity_type"
+                             constraintName="uq_gct_user_entity"/>
+    </changeSet>
+
+</databaseChangeLog>
