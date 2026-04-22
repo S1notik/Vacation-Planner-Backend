@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class RegisterRequest {
+public class RegisterRequest {
     @NotBlank(message = "Email обязателен")
     @Email(message = "Неккоректный email")
     private String email;
