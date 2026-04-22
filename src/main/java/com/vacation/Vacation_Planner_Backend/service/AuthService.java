@@ -13,4 +13,9 @@ public interface AuthService {
     RegisterResponse register(RegisterRequest request);
     // Authenticate user and return tokens
     LoginResponse login(LoginRequest request);
+    // Logout user and blacklist token
+    void logout(String token);
+    // Refresh access token using refresh token
+    LoginResponse refresh(String refreshToken);
+
 }

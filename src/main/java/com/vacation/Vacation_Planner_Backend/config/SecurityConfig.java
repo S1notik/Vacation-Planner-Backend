@@ -31,9 +31,10 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Configure endpoint access
                 .authorizeHttpRequests(auth -> auth
-                        // Open endpoints — no token needed
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // Everything else requires authentication
+                        .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/logout").permitAll()
+                        .requestMatchers("/api/auth/refresh").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Set authentication provider

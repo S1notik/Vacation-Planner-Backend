@@ -8,8 +8,10 @@ import com.vacation.Vacation_Planner_Backend.model.entity.User;
 import com.vacation.Vacation_Planner_Backend.model.enums.Role;
 import com.vacation.Vacation_Planner_Backend.repository.UserRepository;
 import com.vacation.Vacation_Planner_Backend.security.JwtService;
+import com.vacation.Vacation_Planner_Backend.security.TokenBlacklistService;
 import com.vacation.Vacation_Planner_Backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,10 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TokenBlacklistService tokenBlacklistService;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -58,5 +64,27 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return new LoginResponse(accessToken, refreshToken, user.getRole().name());
+    }
+
+    // Logout — add token to blacklist
+    @Override
+    public void logout(String token) {
+        tokenBlacklistService.blacklistToken(token, jwtExpiration);
+    }
+
+    @Override
+    public LoginResponse refresh(String refreshToken) {
+        // Extract email from refresh token
+        String email = jwtService.extractEmail(refreshToken);
+        // Load user from database
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Validate refresh token
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+        // Generate new access token
+        String newAccessToken = jwtService.generateToken(user);
+        return new LoginResponse(newAccessToken, refreshToken, user.getRole().name());
     }
 }
