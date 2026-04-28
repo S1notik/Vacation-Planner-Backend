@@ -41,17 +41,20 @@ public class JwtFilter extends OncePerRequestFilter {
         System.out.println(">>> Request URI: " + request.getRequestURI());
         System.out.println(">>> Auth header: " + authHeader);
         final String token = authHeader.substring(7);
-        // Check if token is blacklisted ← добавили
+        // Check if token is blacklisted
         if (tokenBlacklistService.isTokenBlacklisted(token)) {
+            System.out.println(">>> Token is BLACKLISTED!");
             filterChain.doFilter(request, response);
             return;
         }
+        System.out.println(">>> Token not blacklisted, continuing...");
 
         final String email = jwtService.extractEmail(token);
 
         // If email exists and user is not yet authenticated
+        User user = null;
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = userRepository.findByEmail(email).orElse(null);
+            user = userRepository.findByEmail(email).orElse(null);
             // Validate token
             if (user != null && jwtService.isTokenValid(token, user)) {
                 // Create authentication object
@@ -70,6 +73,24 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+
+        if (user != null && jwtService.isTokenValid(token, user)) {
+            System.out.println(">>> Token valid for: " + user.getEmail());
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            user.getAuthorities()
+                    );
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } else {
+            System.out.println(">>> Token INVALID or user not found");
+        }
+
         // Pass request to next filter
         filterChain.doFilter(request, response);
     }
