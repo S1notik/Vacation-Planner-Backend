@@ -5,11 +5,14 @@ import com.vacation.Vacation_Planner_Backend.dto.vacation.request.ReviewVacation
 import com.vacation.Vacation_Planner_Backend.dto.vacation.response.VacationBalanceResponse;
 import com.vacation.Vacation_Planner_Backend.dto.vacation.response.VacationResponse;
 import com.vacation.Vacation_Planner_Backend.model.entity.*;
+import com.vacation.Vacation_Planner_Backend.model.enums.NotificationType;
 import com.vacation.Vacation_Planner_Backend.model.enums.Status;
 import com.vacation.Vacation_Planner_Backend.repository.*;
 import com.vacation.Vacation_Planner_Backend.service.VacationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.vacation.Vacation_Planner_Backend.model.entity.Notification;
+import com.vacation.Vacation_Planner_Backend.repository.NotificationRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -25,6 +28,8 @@ public class VacationServiceImpl implements VacationService {
     private final TeamMemberRepository teamMemberRepository;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
+    private final NotificationRepository notificationRepository;
+
 
     @Override
     public VacationResponse createVacation(CreateVacationRequest request, User currentUser) {
@@ -51,6 +56,15 @@ public class VacationServiceImpl implements VacationService {
                 .comment(request.getComment())
                 .build();
         vacationRequestRepository.save(vacation);
+
+        // Notify employer about new vacation request
+        Notification notification = Notification.builder()
+                .user(team.getEmployer())
+                .type(NotificationType.VACATION_SUBMITTED)
+                .message("Сотрудник " + currentUser.getName() + " подал заявку на отпуск с "
+                        + request.getStartDate() + " по " + request.getEndDate())
+                .build();
+        notificationRepository.save(notification);
         return new VacationResponse(
                 vacation.getId(),
                 vacation.getStartDate(),
@@ -136,6 +150,22 @@ public class VacationServiceImpl implements VacationService {
             vacationBalanceRepository.save(balance);
         }
         vacationRequestRepository.save(vacation);
+
+        // Notify employee about review decision
+        NotificationType notifType = newStatus == Status.APPROVED
+                ? NotificationType.VACATION_APPROVED
+                : NotificationType.VACATION_REJECTED;
+
+        String notifMessage = newStatus == Status.APPROVED
+                ? "Ваша заявка на отпуск с " + vacation.getStartDate() + " по " + vacation.getEndDate() + " одобрена"
+                : "Ваша заявка на отпуск с " + vacation.getStartDate() + " по " + vacation.getEndDate() + " отклонена";
+
+        Notification notification = Notification.builder()
+                .user(vacation.getUser())
+                .type(notifType)
+                .message(notifMessage)
+                .build();
+        notificationRepository.save(notification);
 
         return new VacationResponse(
                 vacation.getId(),
