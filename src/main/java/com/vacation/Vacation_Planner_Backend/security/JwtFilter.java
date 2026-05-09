@@ -38,17 +38,12 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        System.out.println(">>> Request URI: " + request.getRequestURI());
-        System.out.println(">>> Auth header: " + authHeader);
         final String token = authHeader.substring(7);
         // Check if token is blacklisted
         if (tokenBlacklistService.isTokenBlacklisted(token)) {
-            System.out.println(">>> Token is BLACKLISTED!");
             filterChain.doFilter(request, response);
             return;
         }
-        System.out.println(">>> Token not blacklisted, continuing...");
-
         final String email = jwtService.extractEmail(token);
 
         // If email exists and user is not yet authenticated
@@ -75,8 +70,6 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (user != null && jwtService.isTokenValid(token, user)) {
-            System.out.println(">>> Token valid for: " + user.getEmail());
-
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
                             user,
@@ -87,8 +80,6 @@ public class JwtFilter extends OncePerRequestFilter {
                     new WebAuthenticationDetailsSource().buildDetails(request)
             );
             SecurityContextHolder.getContext().setAuthentication(authToken);
-        } else {
-            System.out.println(">>> Token INVALID or user not found");
         }
 
         // Pass request to next filter
