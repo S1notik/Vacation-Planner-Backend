@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -12,8 +12,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class VacationResponse {
     private UUID id;
-    private LocalDateTime start_date;
-    private LocalDateTime end_date;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private int daysCount;
     private String status;
     private String comment;

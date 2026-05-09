@@ -11,6 +11,7 @@ import com.vacation.Vacation_Planner_Backend.service.TeamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,7 @@ public class TeamController {
 
     // Employee joins a team via invite code
     @PostMapping("/join")
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<JoinTeamResponse> joinTeam(
             @Valid @RequestBody JoinTeamRequest request) {
         return ResponseEntity.ok(teamService.joinTeam(request, getCurrentUser()));

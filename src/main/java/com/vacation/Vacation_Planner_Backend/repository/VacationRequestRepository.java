@@ -1,6 +1,7 @@
 package com.vacation.Vacation_Planner_Backend.repository;
 
 
+import com.vacation.Vacation_Planner_Backend.model.entity.Team;
 import com.vacation.Vacation_Planner_Backend.model.entity.User;
 import com.vacation.Vacation_Planner_Backend.model.entity.VacationRequest;
 import com.vacation.Vacation_Planner_Backend.model.enums.Status;
@@ -13,5 +14,6 @@ import java.util.UUID;
 @Repository
 public interface VacationRequestRepository extends JpaRepository<VacationRequest, UUID> {
     List<VacationRequest> findByUserAndStatus(User user, Status status);
-
+    List<VacationRequest> findByUser(User user);
+    List<VacationRequest> findByTeam(Team team);
 }

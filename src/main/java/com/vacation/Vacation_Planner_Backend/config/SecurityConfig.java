@@ -35,6 +35,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/logout").permitAll()
                         .requestMatchers("/api/auth/refresh").permitAll()
+
+                        .requestMatchers("/api/vacations").authenticated()
+                        .requestMatchers("/api/vacations/my").authenticated()
+                        .requestMatchers("/api/vacations/balance").authenticated()
+                        .requestMatchers("/api/vacations/team").authenticated()
+                        .requestMatchers("/api/vacations/*/review").authenticated()
                         .anyRequest().authenticated()
                 )
                 // Set authentication provider

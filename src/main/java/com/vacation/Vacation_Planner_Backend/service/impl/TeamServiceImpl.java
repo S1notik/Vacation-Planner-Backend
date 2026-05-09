@@ -3,18 +3,17 @@ package com.vacation.Vacation_Planner_Backend.service.impl;
 import com.vacation.Vacation_Planner_Backend.dto.team.request.CreateTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.request.JoinTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.response.*;
-import com.vacation.Vacation_Planner_Backend.model.entity.Team;
-import com.vacation.Vacation_Planner_Backend.model.entity.TeamMember;
-import com.vacation.Vacation_Planner_Backend.model.entity.User;
-import com.vacation.Vacation_Planner_Backend.model.entity.VacationRequest;
+import com.vacation.Vacation_Planner_Backend.model.entity.*;
 import com.vacation.Vacation_Planner_Backend.model.enums.Status;
 import com.vacation.Vacation_Planner_Backend.repository.TeamMemberRepository;
 import com.vacation.Vacation_Planner_Backend.repository.TeamRepository;
+import com.vacation.Vacation_Planner_Backend.repository.VacationBalanceRepository;
 import com.vacation.Vacation_Planner_Backend.repository.VacationRequestRepository;
 import com.vacation.Vacation_Planner_Backend.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,9 +24,21 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final VacationRequestRepository vacationRequestRepository;
+    private final VacationBalanceRepository vacationBalanceRepository;
+
 
     @Override
     public CreateTeamResponse createTeam(CreateTeamRequest request, User currentUser) {
+        // Check if user already owns a team
+        if (teamRepository.findByEmployer(currentUser).isPresent()) {
+            throw new RuntimeException("You already have a team");
+        }
+
+        // Check if user is already a member of another team
+        if (!teamMemberRepository.findByUser(currentUser).isEmpty()) {
+            throw new RuntimeException("You are already a member of a team");
+        }
+
         // Generate unique invite code
         String inviteCode = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
@@ -49,6 +60,16 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public JoinTeamResponse joinTeam(JoinTeamRequest request, User currentUser) {
+        // Check if user already owns a team
+        if (teamRepository.findByEmployer(currentUser).isPresent()) {
+            throw new RuntimeException("You already have a team");
+        }
+
+        // Check if user is already a member of any team
+        if (!teamMemberRepository.findByUser(currentUser).isEmpty()) {
+            throw new RuntimeException("You are already a member of a team");
+        }
+
         // Find team by invite code
         Team team = teamRepository.findByInviteCode(request.getInviteCode())
                 .orElseThrow(() -> new RuntimeException("Invalid invite code"));
@@ -65,6 +86,15 @@ public class TeamServiceImpl implements TeamService {
                 .user(currentUser)
                 .build();
         teamMemberRepository.save(member);
+        // Auto-create vacation balance for new member
+        int currentYear = LocalDate.now().getYear();
+        VacationBalance balance = VacationBalance.builder()
+                .user(currentUser)
+                .year(currentYear)
+                .totalDays(28)
+                .usedDays(0)
+                .build();
+        vacationBalanceRepository.save(balance);
         return new JoinTeamResponse(
                 team.getId(),
                 team.getName(),
