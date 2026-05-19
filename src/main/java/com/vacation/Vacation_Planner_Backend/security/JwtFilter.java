@@ -2,6 +2,7 @@ package com.vacation.Vacation_Planner_Backend.security;
 
 import com.vacation.Vacation_Planner_Backend.model.entity.User;
 import com.vacation.Vacation_Planner_Backend.repository.UserRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +45,14 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        final String email = jwtService.extractEmail(token);
+        String email;
+        try {
+            email = jwtService.extractEmail(token);
+        } catch (ExpiredJwtException e) {
+            // Token expired — just skip, let request continue without auth
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // If email exists and user is not yet authenticated
         User user = null;
