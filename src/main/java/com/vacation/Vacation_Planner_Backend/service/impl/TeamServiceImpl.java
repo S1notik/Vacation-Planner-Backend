@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -137,28 +138,26 @@ public class TeamServiceImpl implements TeamService {
                         .findFirst()
                         .map(TeamMember::getTeam)
                         .orElseThrow(() -> new RuntimeException("Team not found")));
-        List<TeamMember> members = teamMemberRepository.findByTeam(team);
 
-        return members.stream()
-                .map(member -> {
-                    List<VacationPeriod> vacations = vacationRequestRepository
-                            .findByUserAndStatus(member.getUser(), Status.APPROVED)
-                            .stream()
-                            .map(v -> new VacationPeriod(
-                                    v.getStartDate(),
-                                    v.getEndDate(),
-                                    calculateDays(v),
-                                    v.getStatus().name()
-                            ))
-                            .toList();
+        List<TeamCalendarResponse> result = new ArrayList<>();
 
-                    return new TeamCalendarResponse(
-                            member.getUser().getId(),
-                            member.getUser().getName(),
-                            vacations
-                    );
-                })
+        List<VacationPeriod> employerVacations = vacationRequestRepository
+                .findByUserAndStatus(team.getEmployer(), Status.APPROVED)
+                .stream()
+                .map(v -> new VacationPeriod(v.getStartDate(), v.getEndDate(), calculateDays(v), v.getStatus().name()))
                 .toList();
+        result.add(new TeamCalendarResponse(team.getEmployer().getId(), team.getEmployer().getName(), employerVacations));
+
+        teamMemberRepository.findByTeam(team).forEach(member -> {
+            List<VacationPeriod> vacations = vacationRequestRepository
+                    .findByUserAndStatus(member.getUser(), Status.APPROVED)
+                    .stream()
+                    .map(v -> new VacationPeriod(v.getStartDate(), v.getEndDate(), calculateDays(v), v.getStatus().name()))
+                    .toList();
+            result.add(new TeamCalendarResponse(member.getUser().getId(), member.getUser().getName(), vacations));
+        });
+
+        return result;
     }
 
     // Calculate number of vacation days

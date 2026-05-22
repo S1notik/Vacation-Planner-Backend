@@ -34,15 +34,24 @@ public class VacationServiceImpl implements VacationService {
     @Override
     public VacationResponse createVacation(CreateVacationRequest request, User currentUser) {
         // Find user's team
-        Team team = teamMemberRepository.findByUser(currentUser)
-                .stream()
-                .findFirst()
-                .map(TeamMember::getTeam)
-                .orElseThrow(() -> new RuntimeException("User is not in a team"));
+        Team team = teamRepository.findByEmployer(currentUser)
+                .orElseGet(() -> teamMemberRepository.findByUser(currentUser)
+                        .stream()
+                        .findFirst()
+                        .map(TeamMember::getTeam)
+                        .orElseThrow(() -> new RuntimeException("User is not in a team")));
         int currentYear = LocalDate.now().getYear();
         VacationBalance balance = vacationBalanceRepository
                 .findByUserAndYear(currentUser, currentYear)
-                .orElseThrow(() -> new RuntimeException("Vacation balance not found"));
+                .orElseGet(() -> {
+                    VacationBalance newBalance = VacationBalance.builder()
+                            .user(currentUser)
+                            .year(currentYear)
+                            .totalDays(28)
+                            .usedDays(0)
+                            .build();
+                    return vacationBalanceRepository.save(newBalance);
+                });
         long daysCount = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
         if (!balance.hasEnoughDays((int) daysCount)) {
             throw new RuntimeException("Not enough vacation days");
@@ -109,10 +118,7 @@ public class VacationServiceImpl implements VacationService {
     @Override
     public List<VacationResponse> viewAllRequestToVacation(User currentUser) {
         // Find team where user is employer
-        Team team = teamMemberRepository.findByUser(currentUser)
-                .stream()
-                .findFirst()
-                .map(TeamMember::getTeam)
+        Team team = teamRepository.findByEmployer(currentUser)
                 .orElseThrow(() -> new RuntimeException("Team not found"));
 
         return vacationRequestRepository.findByTeam(team)

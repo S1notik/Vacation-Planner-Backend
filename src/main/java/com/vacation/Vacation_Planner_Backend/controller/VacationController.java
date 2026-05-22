@@ -33,7 +33,7 @@ public class VacationController {
 
     // Employee creates vacation request
     @PostMapping
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('EMPLOYER')")
     public ResponseEntity<VacationResponse> createVacation(
             @Valid @RequestBody CreateVacationRequest request) {
         return ResponseEntity.ok(vacationService.createVacation(request, getCurrentUser()));
