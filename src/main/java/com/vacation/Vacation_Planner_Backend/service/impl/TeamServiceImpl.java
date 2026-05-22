@@ -119,13 +119,20 @@ public class TeamServiceImpl implements TeamService {
 
         return teamMemberRepository.findByTeam(team)
                 .stream()
-                .map(member -> new TeamMemberResponse(
-                        member.getUser().getId(),
-                        member.getUser().getName(),
-                        member.getUser().getEmail(),
-                        member.getUser().getRole().name(),
-                        member.getJoinedAt().toString()
-                ))
+                .map(member -> {
+                    int totalDays = vacationBalanceRepository
+                            .findByUserAndYear(member.getUser(), java.time.LocalDate.now().getYear())
+                            .map(b -> b.getTotalDays())
+                            .orElse(28);
+                    return new TeamMemberResponse(
+                            member.getUser().getId(),
+                            member.getUser().getName(),
+                            member.getUser().getEmail(),
+                            member.getUser().getRole().name(),
+                            member.getJoinedAt().toString(),
+                            totalDays
+                    );
+                })
                 .toList();
     }
 

@@ -15,4 +15,5 @@ public class TeamMemberResponse {
     private String email;
     private String role;
     private String joinedAt;
+    private int totalDays;
 }
