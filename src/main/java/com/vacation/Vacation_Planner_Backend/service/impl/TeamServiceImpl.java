@@ -166,4 +166,17 @@ public class TeamServiceImpl implements TeamService {
         return (int) (vacation.getEndDate().toEpochDay()
                 - vacation.getStartDate().toEpochDay() + 1);
     }
+
+
+    @Override
+    public TeamInfoResponse getTeamInfo(User currentUser) {
+        Team team = teamRepository.findByEmployer(currentUser)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        return new TeamInfoResponse(
+                team.getId(),
+                team.getName(),
+                team.getInviteCode(),
+                team.getInviteQrUrl()
+        );
+    }
 }

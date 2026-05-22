@@ -2,10 +2,7 @@ package com.vacation.Vacation_Planner_Backend.controller;
 
 import com.vacation.Vacation_Planner_Backend.dto.team.request.CreateTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.request.JoinTeamRequest;
-import com.vacation.Vacation_Planner_Backend.dto.team.response.CreateTeamResponse;
-import com.vacation.Vacation_Planner_Backend.dto.team.response.JoinTeamResponse;
-import com.vacation.Vacation_Planner_Backend.dto.team.response.TeamCalendarResponse;
-import com.vacation.Vacation_Planner_Backend.dto.team.response.TeamMemberResponse;
+import com.vacation.Vacation_Planner_Backend.dto.team.response.*;
 import com.vacation.Vacation_Planner_Backend.model.entity.User;
 import com.vacation.Vacation_Planner_Backend.service.TeamService;
 import jakarta.validation.Valid;
@@ -57,5 +54,11 @@ public class TeamController {
     @GetMapping("/calendar")
     public ResponseEntity<List<TeamCalendarResponse>> getTeamCalendar() {
         return ResponseEntity.ok(teamService.getTeamCalendar(getCurrentUser()));
+    }
+
+    @GetMapping("/info")
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public ResponseEntity<TeamInfoResponse> getTeamInfo() {
+        return ResponseEntity.ok(teamService.getTeamInfo(getCurrentUser()));
     }
 }
