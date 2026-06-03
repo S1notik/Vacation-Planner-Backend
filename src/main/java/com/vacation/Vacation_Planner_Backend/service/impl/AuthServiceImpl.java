@@ -63,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return new LoginResponse(accessToken, refreshToken, user.getRole().name());
+        return new LoginResponse(accessToken, refreshToken, user.getRole().name(), user.getName());
     }
 
     // Logout — add token to blacklist
@@ -85,6 +85,6 @@ public class AuthServiceImpl implements AuthService {
         }
         // Generate new access token
         String newAccessToken = jwtService.generateToken(user);
-        return new LoginResponse(newAccessToken, refreshToken, user.getRole().name());
+        return new LoginResponse(newAccessToken, refreshToken, user.getRole().name(), user.getName());
     }
 }

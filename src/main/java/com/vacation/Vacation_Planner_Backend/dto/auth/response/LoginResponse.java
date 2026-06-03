@@ -12,4 +12,5 @@ public class LoginResponse {
     private String accessToken;
     private String refreshToken;
     private String role;  // so that Android knows which screen to show
+    private String name;
 }

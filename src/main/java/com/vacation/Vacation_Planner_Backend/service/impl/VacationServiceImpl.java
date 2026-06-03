@@ -107,10 +107,18 @@ public class VacationServiceImpl implements VacationService {
         VacationBalance balance = vacationBalanceRepository
                 .findByUserAndYear(currentUser, currentYear)
                 .orElseThrow(() -> new RuntimeException("Vacation balance not found"));
+
+        int usedDays = vacationRequestRepository
+                .findByUserAndStatus(currentUser, Status.APPROVED)
+                .stream()
+                .filter(v -> v.getStartDate().getYear() == currentYear)
+                .mapToInt(v -> (int) v.durationDays())
+                .sum();
+
         return new VacationBalanceResponse(
                 balance.getTotalDays(),
-                balance.getUsedDays(),
-                balance.remainingDays(),
+                usedDays,
+                balance.getTotalDays() - usedDays,
                 currentYear
         );
     }

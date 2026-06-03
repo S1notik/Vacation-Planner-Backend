@@ -108,32 +108,46 @@ public class TeamServiceImpl implements TeamService {
     public List<TeamMemberResponse> getTeamMembers(User currentUser) {
         // Find team where user is employer OR member
         Team team = teamRepository.findByEmployer(currentUser)
-                .orElseGet(() -> {
-                    // If not employer — find team via membership
-                    return teamMemberRepository.findByUser(currentUser)
-                            .stream()
-                            .findFirst()
-                            .map(TeamMember::getTeam)
-                            .orElseThrow(() -> new RuntimeException("Team not found"));
-                });
+                .orElseGet(() -> teamMemberRepository.findByUser(currentUser)
+                        .stream()
+                        .findFirst()
+                        .map(TeamMember::getTeam)
+                        .orElseThrow(() -> new RuntimeException("Team not found")));
 
-        return teamMemberRepository.findByTeam(team)
+        List<TeamMemberResponse> result = new ArrayList<>();
+
+        // Employer first (хранится в team.employer, не в team_members)
+        result.add(toMemberResponse(team.getEmployer(), team.getCreatedAt().toString()));
+
+        // Then members
+        teamMemberRepository.findByTeam(team).forEach(member ->
+                result.add(toMemberResponse(member.getUser(), member.getJoinedAt().toString())));
+
+        return result;
+    }
+
+    private TeamMemberResponse toMemberResponse(User user, String joinedAt) {
+        int year = LocalDate.now().getYear();
+
+        int totalDays = vacationBalanceRepository.findByUserAndYear(user, year)
+                .map(VacationBalance::getTotalDays)
+                .orElse(28);
+
+        int usedDays = vacationRequestRepository.findByUserAndStatus(user, Status.APPROVED)
                 .stream()
-                .map(member -> {
-                    int totalDays = vacationBalanceRepository
-                            .findByUserAndYear(member.getUser(), java.time.LocalDate.now().getYear())
-                            .map(b -> b.getTotalDays())
-                            .orElse(28);
-                    return new TeamMemberResponse(
-                            member.getUser().getId(),
-                            member.getUser().getName(),
-                            member.getUser().getEmail(),
-                            member.getUser().getRole().name(),
-                            member.getJoinedAt().toString(),
-                            totalDays
-                    );
-                })
-                .toList();
+                .filter(v -> v.getStartDate().getYear() == year)
+                .mapToInt(this::calculateDays)
+                .sum();
+
+        return new TeamMemberResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name(),
+                joinedAt,
+                totalDays,
+                usedDays
+        );
     }
 
     @Override
