@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.vacation.Vacation_Planner_Backend.model.entity.Notification;
 import com.vacation.Vacation_Planner_Backend.repository.NotificationRepository;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -148,6 +149,13 @@ public class VacationServiceImpl implements VacationService {
         // Find vacation request
         VacationRequest vacation = vacationRequestRepository.findById(vacationId)
                 .orElseThrow(() -> new RuntimeException("Vacation request not found"));
+
+        if (vacation.getTeam() == null
+                || vacation.getTeam().getEmployer() == null
+                || !vacation.getTeam().getEmployer().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You can only review vacations from your own team");
+        }
+
         // Update status
         Status newStatus = Status.valueOf(request.getStatus());
         vacation.setStatus(newStatus);
@@ -223,6 +231,14 @@ public class VacationServiceImpl implements VacationService {
         // Find employee
         User employee = userRepository.findById(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        Team team = teamRepository.findByEmployer(currentUser)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
+        boolean isOwnTeamMember = teamMemberRepository.existsByTeamAndUser(team, employee);
+        boolean isSelf = employee.getId().equals(currentUser.getId());
+        if (!isOwnTeamMember && !isSelf) {
+            throw new AccessDeniedException("You can only set balance for members of your own team");
+        }
 
         int currentYear = LocalDate.now().getYear();
 
