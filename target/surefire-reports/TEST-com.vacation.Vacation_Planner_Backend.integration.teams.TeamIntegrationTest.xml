@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="7.485" tests="8" errors="0" skipped="0" failures="0" flakes="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest" time="0.399" tests="3" errors="0" skipped="0" failures="0" flakes="0">
   <properties>
     <property name="java.specification.version" value="25"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -68,169 +68,14 @@
     <property name="java.class.version" value="69.0"/>
     <property name="LOGGED_APPLICATION_NAME" value="[Vacation-Planner-Backend] "/>
   </properties>
-  <testcase name="login_withWrongPassword_returns401" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.863">
-    <system-out><![CDATA[00:34:07.395 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest]: AuthFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-00:34:07.419 [main] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
-00:34:07.419 [main] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
-00:34:07.429 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 2.0.4
-00:34:07.532 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
-00:34:07.717 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
-00:34:07.717 [main] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
-00:34:07.730 [main] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
-  Server Version: 28.5.1
-  API Version: 1.51
-  Operating System: Docker Desktop
-  Total Memory: 7837 MB
-  Labels: 
-    com.docker.desktop.address=unix:///Users/syoma/Library/Containers/com.docker.docker/Data/docker-cli.sock
-00:34:07.854 [main] INFO tc.testcontainers/ryuk:0.14.0 -- Creating container for image: testcontainers/ryuk:0.14.0
-00:34:08.036 [main] INFO tc.testcontainers/ryuk:0.14.0 -- Container testcontainers/ryuk:0.14.0 is starting: 379a53260cd28ec828148bbd74098f0d805821244646e1cfe9869b3f40ced653
-00:34:08.221 [main] INFO tc.testcontainers/ryuk:0.14.0 -- Container testcontainers/ryuk:0.14.0 started in PT0.367318S
-00:34:08.225 [main] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
-00:34:08.225 [main] INFO org.testcontainers.DockerClientFactory -- Checking the system...
-00:34:08.225 [main] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
-00:34:08.226 [main] INFO tc.postgres:18 -- Creating container for image: postgres:18
-00:34:08.272 [main] INFO tc.postgres:18 -- Container postgres:18 is starting: b826e66467355bc0fec99880b5cf8e5c35a91825894744910eac7639665421d0
-00:34:09.032 [main] INFO tc.postgres:18 -- Container postgres:18 started in PT0.806211S
-00:34:09.033 [main] INFO tc.postgres:18 -- Container is started (JDBC URL: jdbc:postgresql://localhost:59864/test?loggerLevel=OFF)
-00:34:09.114 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.vacation.Vacation_Planner_Backend.VacationPlannerBackendApplication for test class com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest
-00:34:09.142 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest]: AuthFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-00:34:09.143 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.vacation.Vacation_Planner_Backend.integration.AbstractIntegrationTest]: AbstractIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-00:34:09.146 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.vacation.Vacation_Planner_Backend.VacationPlannerBackendApplication for test class com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest
-
-  .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
- \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
-  '  |____| .__|_| |_|_| |_\__, | / / / /
- =========|_|==============|___/=/_/_/_/
-
- :: Spring Boot ::                (v4.0.4)
-
-2026-06-30T00:34:09.307+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] c.v.V.i.auth.AuthFlowIntegrationTest     : Starting AuthFlowIntegrationTest using Java 25.0.2 with PID 54759 (started by syoma in /Users/syoma/Vacation-Planner-Backend)
-2026-06-30T00:34:09.308+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] c.v.V.i.auth.AuthFlowIntegrationTest     : The following 1 profile is active: "test"
-2026-06-30T00:34:09.622+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
-2026-06-30T00:34:09.623+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-06-30T00:34:09.688+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 62 ms. Found 8 JPA repository interfaces.
-2026-06-30T00:34:09.708+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
-2026-06-30T00:34:09.708+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.DocumentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.GoogleCalendarTokenRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.NotificationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.TeamMemberRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.TeamRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.VacationBalanceRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.716+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.vacation.Vacation_Planner_Backend.repository.VacationRequestRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2026-06-30T00:34:09.717+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 4 ms. Found 0 Redis repository interfaces.
-2026-06-30T00:34:10.350+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 0 (http)
-2026-06-30T00:34:10.365+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-30T00:34:10.366+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.18]
-2026-06-30T00:34:10.407+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1021 ms
-2026-06-30T00:34:10.771+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.database                       : Set default schema name to public
-2026-06-30T00:34:11.768+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Creating database changelog table with name: public.databasechangelog
-2026-06-30T00:34:11.783+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Reading from public.databasechangelog
-2026-06-30T00:34:11.827+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.snapshot                       : Creating snapshot
-2026-06-30T00:34:11.917+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.lockservice                    : Successfully acquired change log lock
-2026-06-30T00:34:11.921+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.command                        : Using deploymentId: 2768850573
-2026-06-30T00:34:11.923+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Reading from public.databasechangelog
-2026-06-30T00:34:11.971+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-users.xml::2026-04-14-create-users::vacation-planner
-2026-06-30T00:34:11.990+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table users created
-2026-06-30T00:34:12.000+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Custom SQL executed
-2026-06-30T00:34:12.004+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-users.xml::2026-04-14-create-users::vacation-planner ran successfully in 28ms
-2026-06-30T00:34:12.011+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-teams.xml::2026-04-14-create-teams::vacation-planner
-2026-06-30T00:34:12.023+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table teams created
-2026-06-30T00:34:12.026+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_teams_employer_id created
-2026-06-30T00:34:12.027+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-teams.xml::2026-04-14-create-teams::vacation-planner ran successfully in 14ms
-2026-06-30T00:34:12.030+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-team-members.xml::2026-04-14-create-team-members::vacation-planner
-2026-06-30T00:34:12.034+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table team_members created
-2026-06-30T00:34:12.037+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Unique constraint added to team_members(team_id, user_id)
-2026-06-30T00:34:12.038+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_team_members_team_id created
-2026-06-30T00:34:12.040+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_team_members_user_id created
-2026-06-30T00:34:12.040+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-team-members.xml::2026-04-14-create-team-members::vacation-planner ran successfully in 10ms
-2026-06-30T00:34:12.044+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-vacation-balance.xml::2026-04-14-create-vacation-balance::vacation-planner
-2026-06-30T00:34:12.048+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table vacation_balance created
-2026-06-30T00:34:12.049+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Unique constraint added to vacation_balance(user_id, year)
-2026-06-30T00:34:12.052+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Custom SQL executed
-2026-06-30T00:34:12.054+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_vacation_balance_user_id created
-2026-06-30T00:34:12.055+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-vacation-balance.xml::2026-04-14-create-vacation-balance::vacation-planner ran successfully in 11ms
-2026-06-30T00:34:12.057+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-notifications.xml::2026-04-14-create-notifications::vacation-planner
-2026-06-30T00:34:12.062+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table notifications created
-2026-06-30T00:34:12.063+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Custom SQL executed
-2026-06-30T00:34:12.065+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_notifications_user_is_read created
-2026-06-30T00:34:12.065+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-notifications.xml::2026-04-14-create-notifications::vacation-planner ran successfully in 7ms
-2026-06-30T00:34:12.068+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-google-calendar-token.xml::2026-04-14-create-google-calendar-token::vacation-planner
-2026-06-30T00:34:12.072+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table google_calendar_tokens created
-2026-06-30T00:34:12.073+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Custom SQL executed
-2026-06-30T00:34:12.074+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Unique constraint added to google_calendar_tokens(user_id, entity_type)
-2026-06-30T00:34:12.075+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-google-calendar-token.xml::2026-04-14-create-google-calendar-token::vacation-planner ran successfully in 7ms
-2026-06-30T00:34:12.078+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-vacation-requests.xml::2026-04-14-create-vacation-requests::vacation-planner
-2026-06-30T00:34:12.083+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table vacation_requests created
-2026-06-30T00:34:12.084+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Custom SQL executed
-2026-06-30T00:34:12.085+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Custom SQL executed
-2026-06-30T00:34:12.086+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_vr_user_id created
-2026-06-30T00:34:12.086+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_vr_team_status created
-2026-06-30T00:34:12.087+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_vr_dates created
-2026-06-30T00:34:12.088+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-vacation-requests.xml::2026-04-14-create-vacation-requests::vacation-planner ran successfully in 10ms
-2026-06-30T00:34:12.090+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Running Changeset: db/changelog/1.0/2026-04-14-create-documents.xml::2026-04-14-create-documents::vacation-planner
-2026-06-30T00:34:12.093+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Table documents created
-2026-06-30T00:34:12.094+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : Index idx_documents_vr_id created
-2026-06-30T00:34:12.095+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.changelog                      : ChangeSet db/changelog/1.0/2026-04-14-create-documents.xml::2026-04-14-create-documents::vacation-planner ran successfully in 5ms
-2026-06-30T00:34:12.098+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : UPDATE SUMMARY
-2026-06-30T00:34:12.098+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : Run:                          8
-2026-06-30T00:34:12.098+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : Previously run:               0
-2026-06-30T00:34:12.098+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : Filtered out:                 0
-2026-06-30T00:34:12.098+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : -------------------------------
-2026-06-30T00:34:12.098+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : Total change sets:            8
-2026-06-30T00:34:12.099+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.util                           : Update summary generated
-2026-06-30T00:34:12.100+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.command                        : Update command completed successfully.
-2026-06-30T00:34:12.100+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.ui                             : Liquibase: Update has been successful. Rows affected: 0
-2026-06-30T00:34:12.103+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.lockservice                    : Successfully released change log lock
-2026-06-30T00:34:12.104+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] liquibase.command                        : Command execution complete
-2026-06-30T00:34:12.147+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
-2026-06-30T00:34:12.171+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.7.Final
-2026-06-30T00:34:12.269+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-06-30T00:34:12.281+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-30T00:34:12.296+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7252e3ec
-2026-06-30T00:34:12.297+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-30T00:34:12.308+03:00  WARN 54759 --- [Vacation-Planner-Backend] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-06-30T00:34:12.322+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [jdbc:postgresql://localhost:59864/test?loggerLevel=OFF]
-	Database driver: PostgreSQL JDBC Driver
-	Database dialect: PostgreSQLDialect
-	Database version: 18.4
-	Default catalog/schema: test/public
-	Autocommit mode: undefined/unknown
-	Isolation level: READ_COMMITTED [default READ_COMMITTED]
-	JDBC fetch size: none
-	Pool: DataSourceConnectionProvider
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
-2026-06-30T00:34:12.714+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-06-30T00:34:12.717+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-06-30T00:34:12.739+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-06-30T00:34:12.848+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
-2026-06-30T00:34:12.849+03:00  WARN 54759 --- [Vacation-Planner-Backend] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
-2026-06-30T00:34:12.925+03:00  WARN 54759 --- [Vacation-Planner-Backend] [           main] i.n.r.d.DnsServerAddressStreamProviders  : Can not find io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider in the classpath, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'
-2026-06-30T00:34:13.031+03:00  WARN 54759 --- [Vacation-Planner-Backend] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-06-30T00:34:13.269+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 59879 (http) with context path '/'
-2026-06-30T00:34:13.272+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] c.v.V.i.auth.AuthFlowIntegrationTest     : Started AuthFlowIntegrationTest in 4.098 seconds (process running for 6.458)
-2026-06-30T00:34:13.541+03:00  INFO 54759 --- [Vacation-Planner-Backend] [o-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-30T00:34:13.541+03:00  INFO 54759 --- [Vacation-Planner-Backend] [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-06-30T00:34:13.542+03:00  INFO 54759 --- [Vacation-Planner-Backend] [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+  <testcase name="createTeam_withValidData_returns200" classname="com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest" time="0.117">
+    <system-out><![CDATA[2026-06-30T00:34:14.820+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest]: TeamIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-06-30T00:34:14.826+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.vacation.Vacation_Planner_Backend.VacationPlannerBackendApplication for test class com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest
+2026-06-30T00:34:14.826+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest]: TeamIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-06-30T00:34:14.826+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.vacation.Vacation_Planner_Backend.integration.AbstractIntegrationTest]: AbstractIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-06-30T00:34:14.827+03:00  INFO 54759 --- [Vacation-Planner-Backend] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.vacation.Vacation_Planner_Backend.VacationPlannerBackendApplication for test class com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest
 ]]></system-out>
-    <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
-WARNING: A Java agent has been loaded dynamically (/Users/syoma/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
-WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
-WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
-WARNING: Dynamic loading of agents will be disallowed by default in a future release
-]]></system-err>
   </testcase>
-  <testcase name="login_withNonexistentEmail_returns401" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.072"/>
-  <testcase name="loginEmployee_withValidData_returns200AndToken" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.145"/>
-  <testcase name="register_withValidData_returns200AndToken(String, String, String)[1]" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.075"/>
-  <testcase name="register_withValidData_returns200AndToken(String, String, String)[2]" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.072"/>
-  <testcase name="loginEmployer_withValidData_returns200AndToken" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.141"/>
-  <testcase name="registerEmployee_withDuplicateEmail_returns409" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.077"/>
-  <testcase name="registerEmployer_withDuplicateEmail_returns409" classname="com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest" time="0.075"/>
+  <testcase name="joinTeam_withValidInviteCode_returns200" classname="com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest" time="0.191"/>
+  <testcase name="joinTeam_withInvalidInviteCode_returns400" classname="com.vacation.Vacation_Planner_Backend.integration.teams.TeamIntegrationTest" time="0.08"/>
 </testsuite>

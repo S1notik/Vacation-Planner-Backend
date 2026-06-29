@@ -10,19 +10,19 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Testcontainers
 public abstract class AbstractIntegrationTest {
 
-    @Container
     @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
+
+    static {
+        postgres.start();
+    }
 
     @LocalServerPort
     protected int port;
@@ -48,5 +48,20 @@ public abstract class AbstractIntegrationTest {
                 .then()
                 .statusCode(200)
                 .extract().path("accessToken");
+    }
+
+    protected String createTeamAndGetInviteCode(String employerToken, String teamName) {
+        String body = """
+                {"name": "%s"}
+                """.formatted(teamName);
+        return given()
+                .header("Authorization", "Bearer " + employerToken)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/api/teams")
+                .then()
+                .statusCode(200)
+                .extract().path("inviteCode");
     }
 }
