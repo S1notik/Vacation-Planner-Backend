@@ -4,17 +4,19 @@ spring:
     username: ${USERNAME}
     password: ${SECRET_PASSWORD}
     driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
   jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
       hibernate:
-        ddl-auto: update
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-          format_sql: true
-
-      sql:
-        init:
-          mode: never
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    sql:
+      init:
+        mode: never
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}

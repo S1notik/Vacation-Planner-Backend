@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.503 s -- in com.vacation.Vacation_Planner_Backend.integration.auth.AuthFlowIntegrationTest

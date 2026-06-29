@@ -1,1 +1,3 @@
+com/vacation/Vacation_Planner_Backend/integration/AbstractIntegrationTest.class
+com/vacation/Vacation_Planner_Backend/integration/auth/AuthFlowIntegrationTest.class
 com/vacation/Vacation_Planner_Backend/VacationPlannerBackendApplicationTests.class
