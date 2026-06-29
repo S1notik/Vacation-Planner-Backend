@@ -1,4 +1,4 @@
-package com.vacation.Vacation_Planner_Backend.integration.teams;
+package com.vacation.Vacation_Planner_Backend.integration.team;
 
 import com.vacation.Vacation_Planner_Backend.integration.AbstractIntegrationTest;
 import io.restassured.http.ContentType;
