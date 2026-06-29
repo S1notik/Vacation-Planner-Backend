@@ -87,4 +87,46 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .extract().asString();
         assertTrue(vacationResponse.contains("Access denied"));
     }
+
+    @Test
+    void employerCannotSetBalanceForEmployeeFromAnotherTeam() {
+        // team B
+        String employerB = register("balEmployerB@mail.ru", "BossB", "EMPLOYER");
+        String inviteCodeB = createTeamAndGetInviteCode(employerB, "balTeamB");
+
+        String employeeB = register("balEmployeeB@mail.ru", "WorkerB", "EMPLOYEE");
+        given()
+                .header("Authorization", "Bearer " + employeeB)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"inviteCode": "%s"}
+                        """.formatted(inviteCodeB))
+                .when()
+                .post("/api/teams/join")
+                .then()
+                .statusCode(200);
+        String employeeId = given()
+                .header("Authorization", "Bearer " + employeeB)
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/teams/members")
+                .then()
+                .statusCode(200)
+                .extract().path("find { it.role == 'EMPLOYEE' }.id");
+
+        // team A
+        String employerA = register("balEmployerA@mail.ru", "BossA", "EMPLOYER");
+        createTeamAndGetInviteCode(employerA, "teamA");
+
+        String vacationResponse = given()
+                .header("Authorization", "Bearer " + employerA)
+                .queryParam("totalDays", 20)
+                .when()
+                .put("/api/vacations/balance/{employeeId}", employeeId)
+                .then()
+                .statusCode(403)
+                .extract().asString();
+        assertTrue(vacationResponse.contains("Access denied"));
+    }
+
 }

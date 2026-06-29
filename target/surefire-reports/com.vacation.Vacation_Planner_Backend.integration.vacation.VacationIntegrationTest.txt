@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.vacation.Vacation_Planner_Backend.integration.vacation.VacationIntegrationTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.529 s -- in com.vacation.Vacation_Planner_Backend.integration.vacation.VacationIntegrationTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.983 s -- in com.vacation.Vacation_Planner_Backend.integration.vacation.VacationIntegrationTest
