@@ -53,6 +53,9 @@ public class VacationServiceImpl implements VacationService {
                             .build();
                     return vacationBalanceRepository.save(newBalance);
                 });
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new RuntimeException("End date cannot be before start date");
+        }
         long daysCount = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
         if (!balance.hasEnoughDays((int) daysCount)) {
             throw new RuntimeException("Not enough vacation days");

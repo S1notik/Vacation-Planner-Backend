@@ -40,7 +40,6 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         String employeeB = register("isoEmployeeB@mail.ru", "WorkerB", "EMPLOYEE");
         inviteUser(employeeB, inviteCodeB);
 
-
         String vacationIdB = given()
                 .header("Authorization", "Bearer " + employeeB)
                 .contentType(ContentType.JSON)
@@ -75,7 +74,6 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         // team B
         String employerB = register("balEmployerB@mail.ru", "BossB", "EMPLOYER");
         String inviteCodeB = createTeamAndGetInviteCode(employerB, "balTeamB");
-
         String employeeB = register("balEmployeeB@mail.ru", "WorkerB", "EMPLOYEE");
         inviteUser(employeeB, inviteCodeB);
         String employeeId = given()
@@ -90,7 +88,6 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         // team A
         String employerA = register("balEmployerA@mail.ru", "BossA", "EMPLOYER");
         createTeamAndGetInviteCode(employerA, "teamA");
-
         String vacationResponse = given()
                 .header("Authorization", "Bearer " + employerA)
                 .queryParam("totalDays", 20)
@@ -105,7 +102,6 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void createVacation_whenNotInTeam_returns400() {
         String employee = register("notInTeamEmployee@mail.ru", "WorkerA", "EMPLOYEE");
-
         String errorBody = given()
                 .header("Authorization", "Bearer " + employee)
                 .contentType(ContentType.JSON)
@@ -118,6 +114,26 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .statusCode(400)
                 .extract().asString();
         assertTrue(errorBody.contains("User is not in a team"));
+    }
+
+    @Test
+    void createVacation_withEndDateBeforeStartDate_returns400() {
+        String employer = register("dateEmployer@mail.ru", "CEO", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "dateTeam");
+        String employee = register("dateEmployee@mail.ru", "Worker", "EMPLOYEE");
+        inviteUser(employee, inviteCode);
+        String response = given()
+                .header("Authorization", "Bearer " + employee)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"startDate": "2026-08-10", "endDate": "2026-08-01"}
+                        """)
+                .when()
+                .post("/api/vacations")
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(response.contains("End date cannot be before start date"));
     }
 
 }
