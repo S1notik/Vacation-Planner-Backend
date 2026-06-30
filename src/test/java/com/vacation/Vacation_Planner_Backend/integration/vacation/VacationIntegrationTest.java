@@ -3,7 +3,6 @@ package com.vacation.Vacation_Planner_Backend.integration.vacation;
 import com.vacation.Vacation_Planner_Backend.integration.AbstractIntegrationTest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,16 +16,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         String inviteCode = createTeamAndGetInviteCode(employerToken, "vacTeam");
 
         String employeeToken = register("vacemployee@mail.ru", "Worker", "EMPLOYEE");
-        given()
-                .header("Authorization", "Bearer " + employeeToken)
-                .contentType(ContentType.JSON)
-                .body("""
-                        {"inviteCode": "%s"}
-                        """.formatted(inviteCode))
-                .when()
-                .post("/api/teams/join")
-                .then()
-                .statusCode(200);
+        inviteUser(employeeToken, inviteCode);
 
         String vacationId = given()
                 .header("Authorization", "Bearer " + employeeToken)
@@ -48,16 +38,8 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         String employerB = register("isoEmployerB@mail.ru", "BossB", "EMPLOYER");
         String inviteCodeB = createTeamAndGetInviteCode(employerB, "teamB");
         String employeeB = register("isoEmployeeB@mail.ru", "WorkerB", "EMPLOYEE");
-        given()
-                .header("Authorization", "Bearer " + employeeB)
-                .contentType(ContentType.JSON)
-                .body("""
-                        {"inviteCode": "%s"}
-                        """.formatted(inviteCodeB))
-                .when()
-                .post("/api/teams/join")
-                .then()
-                .statusCode(200);
+        inviteUser(employeeB, inviteCodeB);
+
 
         String vacationIdB = given()
                 .header("Authorization", "Bearer " + employeeB)
@@ -95,16 +77,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         String inviteCodeB = createTeamAndGetInviteCode(employerB, "balTeamB");
 
         String employeeB = register("balEmployeeB@mail.ru", "WorkerB", "EMPLOYEE");
-        given()
-                .header("Authorization", "Bearer " + employeeB)
-                .contentType(ContentType.JSON)
-                .body("""
-                        {"inviteCode": "%s"}
-                        """.formatted(inviteCodeB))
-                .when()
-                .post("/api/teams/join")
-                .then()
-                .statusCode(200);
+        inviteUser(employeeB, inviteCodeB);
         String employeeId = given()
                 .header("Authorization", "Bearer " + employeeB)
                 .contentType(ContentType.JSON)
@@ -127,6 +100,24 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .statusCode(403)
                 .extract().asString();
         assertTrue(vacationResponse.contains("Access denied"));
+    }
+
+    @Test
+    void createVacation_whenNotInTeam_returns400() {
+        String employee = register("notInTeamEmployee@mail.ru", "WorkerA", "EMPLOYEE");
+
+        String errorBody = given()
+                .header("Authorization", "Bearer " + employee)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"startDate": "2026-08-01", "endDate": "2026-08-10"}
+                        """)
+                .when()
+                .post("/api/vacations")
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(errorBody.contains("User is not in a team"));
     }
 
 }

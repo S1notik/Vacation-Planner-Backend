@@ -64,4 +64,18 @@ public abstract class AbstractIntegrationTest {
                 .statusCode(200)
                 .extract().path("inviteCode");
     }
+
+    protected String inviteUser(String employeeToken, String inviteCode) {
+        return given()
+                .header("Authorization", "Bearer " + employeeToken)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"inviteCode": "%s"}
+                        """.formatted(inviteCode))
+                .when()
+                .post("/api/teams/join")
+                .then()
+                .statusCode(200)
+                .extract().asString();
+    }
 }
