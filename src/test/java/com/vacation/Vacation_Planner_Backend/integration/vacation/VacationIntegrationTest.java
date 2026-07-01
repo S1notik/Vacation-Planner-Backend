@@ -183,7 +183,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     @Test
     void usedDays_reflectApprovedVacation() {
         String employer = register("usedDaysEmployer@mail.ru", "CEO", "EMPLOYER");
-        String vacationId = createTeamWithVacation(employer, "usedDaysEmployee@mail.ru", "usedDaysTeam");
+        String vacationCode = createTeamWithVacation(employer, "usedDaysEmployee@mail.ru", "usedDaysTeam");
         given()
                 .header("Authorization", "Bearer " + employer)
                 .contentType(ContentType.JSON)
@@ -191,7 +191,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                         {"status": "APPROVED"}
                         """)
                 .when()
-                .put("/api/vacations/{id}/review", vacationId)
+                .put("/api/vacations/{id}/review", vacationCode)
                 .then()
                 .statusCode(200);
         int usedDays = given()
@@ -203,4 +203,62 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .extract().path("find { it.role == 'EMPLOYEE' }.usedDays");
         assertEquals(10, usedDays);
     }
+
+    @Test
+    void viewMyVacation_returns200() {
+        String employer = register("userVacEmployer@mail.ru", "Geralt", "EMPLOYER");
+        String vacationCode = createTeamAndGetInviteCode(employer, "userVacTeam");
+        String employee = register("userVacEmployeer@mail.ru", "Jack", "EMPLOYEE");
+        inviteUser(employee, vacationCode);
+        createVacation(employee, "2026-08-01", "2026-08-10");
+        given()
+                .header("Authorization", "Bearer " + employee)
+                .when()
+                .get("/api/vacations/my")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    void viewEmployeeBalance_returns200() {
+        String employer = register("balanceEmployer@mail.ru", "Geralt", "EMPLOYER");
+        String vacationCode = createTeamAndGetInviteCode(employer, "BalanceTeam");
+        String employee = register("balanceEmployee@mail.ru", "Jack", "EMPLOYEE");
+        inviteUser(employee, vacationCode);
+        int totalDays = given()
+                .header("Authorization", "Bearer " + employee)
+                .when()
+                .get("/api/vacations/balance")
+                .then()
+                .statusCode(200)
+                .extract().path("totalDays");
+        assertEquals(28, totalDays);
+    }
+
+    @Test
+    void viewTeamVacations_asEmployee_returns403() {
+        String employee = register("teamViewEmployee@mail.ru", "Worker", "EMPLOYEE");
+
+        given()
+                .header("Authorization", "Bearer " + employee)
+                .when()
+                .get("/api/vacations/team")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void viewTeamVacations_asEmployer_returns200() {
+        String employer = register("teamViewHappyEmployer@mail.ru", "CEO", "EMPLOYER");
+        createTeamWithVacation(employer, "teamViewHappyEmployee@mail.ru", "teamViewHappyTeam");
+        String response = given()
+                .header("Authorization", "Bearer " + employer)
+                .when()
+                .get("/api/vacations/team")
+                .then()
+                .statusCode(200)
+                .extract().asString();
+        assertTrue(response.contains("PENDING"));
+    }
+
 }

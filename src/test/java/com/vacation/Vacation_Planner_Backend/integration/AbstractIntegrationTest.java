@@ -96,4 +96,8 @@ public abstract class AbstractIntegrationTest {
         inviteUser(employeeToken, inviteCode);
         return createVacation(employeeToken, "2026-08-01", "2026-08-10");
     }
+
+    protected String uniqueEmail() {
+        return "user-" + java.util.UUID.randomUUID() + "@mail.ru";
+    }
 }
