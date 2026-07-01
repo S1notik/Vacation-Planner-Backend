@@ -159,6 +159,10 @@ public class VacationServiceImpl implements VacationService {
             throw new AccessDeniedException("You can only review vacations from your own team");
         }
 
+        if (vacation.getStatus() != Status.PENDING) {
+            throw new RuntimeException("Vacation request is already reviewed");
+        }
+
         // Update status
         Status newStatus;
         try {

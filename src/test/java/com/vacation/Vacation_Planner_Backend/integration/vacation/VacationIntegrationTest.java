@@ -128,4 +128,33 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         assertTrue(errorBody.contains("Invalid status"));
     }
 
+    @Test
+    void reviewVacation_whenAlreadyReviewed_returns400() {
+        String employer = register("doubleReviewEmployer@mail.ru", "CEO", "EMPLOYER");
+        String vacationId = createTeamWithVacation(employer, "doubleReviewEmployee@mail.ru",
+                "doubleReviewTeam");
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "APPROVED"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(200);
+
+        String errorBody = given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "REJECTED"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(errorBody.contains("Vacation request is already reviewed"));
+    }
 }
