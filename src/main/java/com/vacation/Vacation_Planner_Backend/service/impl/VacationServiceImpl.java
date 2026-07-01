@@ -42,6 +42,7 @@ public class VacationServiceImpl implements VacationService {
                         .map(TeamMember::getTeam)
                         .orElseThrow(() -> new RuntimeException("User is not in a team")));
         int currentYear = LocalDate.now().getYear();
+        int usedDays = calculateUsedDays(currentUser, currentYear);
         VacationBalance balance = vacationBalanceRepository
                 .findByUserAndYear(currentUser, currentYear)
                 .orElseGet(() -> {
@@ -53,8 +54,11 @@ public class VacationServiceImpl implements VacationService {
                             .build();
                     return vacationBalanceRepository.save(newBalance);
                 });
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new RuntimeException("End date cannot be before start date");
+        }
         long daysCount = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
-        if (!balance.hasEnoughDays((int) daysCount)) {
+        if (balance.getTotalDays() - usedDays < daysCount) {
             throw new RuntimeException("Not enough vacation days");
         }
         VacationRequest vacation = VacationRequest.builder()
@@ -109,13 +113,7 @@ public class VacationServiceImpl implements VacationService {
                 .findByUserAndYear(currentUser, currentYear)
                 .orElseThrow(() -> new RuntimeException("Vacation balance not found"));
 
-        int usedDays = vacationRequestRepository
-                .findByUserAndStatus(currentUser, Status.APPROVED)
-                .stream()
-                .filter(v -> v.getStartDate().getYear() == currentYear)
-                .mapToInt(v -> (int) v.durationDays())
-                .sum();
-
+        int usedDays = calculateUsedDays(currentUser, currentYear);
         return new VacationBalanceResponse(
                 balance.getTotalDays(),
                 usedDays,
@@ -156,21 +154,20 @@ public class VacationServiceImpl implements VacationService {
             throw new AccessDeniedException("You can only review vacations from your own team");
         }
 
+        if (vacation.getStatus() != Status.PENDING) {
+            throw new RuntimeException("Vacation request is already reviewed");
+        }
+
         // Update status
-        Status newStatus = Status.valueOf(request.getStatus());
+        Status newStatus;
+        try {
+            newStatus = Status.valueOf(request.getStatus());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status");
+        }
         vacation.setStatus(newStatus);
         vacation.setReviewedBy(currentUser);
         vacation.setReviewedAt(java.time.LocalDateTime.now());
-        // If approved — update used days in balance
-        if (newStatus == Status.APPROVED) {
-            int currentYear = LocalDate.now().getYear();
-            VacationBalance balance = vacationBalanceRepository
-                    .findByUserAndYear(vacation.getUser(), currentYear)
-                    .orElseThrow(() -> new RuntimeException("Vacation balance not found"));
-
-            balance.setUsedDays(balance.getUsedDays() + (int) vacation.durationDays());
-            vacationBalanceRepository.save(balance);
-        }
         vacationRequestRepository.save(vacation);
 
         // Notify employee about review decision
@@ -270,14 +267,22 @@ public class VacationServiceImpl implements VacationService {
 
         int currentYear = LocalDate.now().getYear();
 
+        List<User> users = new java.util.ArrayList<>(
+                teamMemberRepository.findByTeam(team).stream()
+                        .map(TeamMember::getUser)
+                        .toList()
+        );
+
+        users.add(team.getEmployer());
+
+
         // Update balance for all team members
-        return teamMemberRepository.findByTeam(team)
-                .stream()
-                .map(member -> {
+        return users.stream()
+                .map(user -> {
                     VacationBalance balance = vacationBalanceRepository
-                            .findByUserAndYear(member.getUser(), currentYear)
+                            .findByUserAndYear(user, currentYear)
                             .orElse(VacationBalance.builder()
-                                    .user(member.getUser())
+                                    .user(user)
                                     .year(currentYear)
                                     .usedDays(0)
                                     .build());
@@ -293,6 +298,15 @@ public class VacationServiceImpl implements VacationService {
                     );
                 })
                 .toList();
+    }
+
+    private int calculateUsedDays(User user, int year) {
+        return vacationRequestRepository
+                .findByUserAndStatus(user, Status.APPROVED)
+                .stream()
+                .filter(v -> v.getStartDate().getYear() == year)
+                .mapToInt(v -> (int) v.durationDays())
+                .sum();
     }
 
 }
