@@ -116,4 +116,23 @@ public class TeamIntegrationTest extends AbstractIntegrationTest {
                 .extract().asString();
         assertTrue(errorBody.contains("You are already a member of a team"));
     }
+
+    @Test
+    void createTeam_whenEmployerAlreadyHaveTeam_returns409() {
+        String employer = register(uniqueEmail(), "BOB", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "membersTeam");
+        String body = """
+                {"name": "%s"}
+                """.formatted("membersTeam2");
+        String errorBody = given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/api/teams")
+                .then()
+                .statusCode(409)
+                .extract().asString();
+        System.out.println("Error: "+ errorBody);
+    }
 }
