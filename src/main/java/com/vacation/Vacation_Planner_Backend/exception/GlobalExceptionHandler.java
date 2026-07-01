@@ -45,6 +45,7 @@ public class GlobalExceptionHandler {
             case "End date cannot be before start date" -> HttpStatus.BAD_REQUEST;
             case "Invalid status" -> HttpStatus.BAD_REQUEST;
             case "Vacation request is already reviewed" -> HttpStatus.BAD_REQUEST;
+            case "You are already a member of a team" -> HttpStatus.CONFLICT;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
 

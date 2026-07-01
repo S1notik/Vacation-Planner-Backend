@@ -57,4 +57,63 @@ public class TeamIntegrationTest extends AbstractIntegrationTest {
                 .extract().asString();
         assertTrue(joinResponse.contains("Invalid invite code"));
     }
+
+    @Test
+    void viewTeamMembers_returns200() {
+        String employer = register(uniqueEmail(), "BOB", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "membersTeam");
+        String employee = register(uniqueEmail(), "Jack", "EMPLOYEE");
+        inviteUser(employee, inviteCode);
+        String response = given()
+                .header("Authorization", "Bearer " + employer)
+                .when()
+                .get("/api/teams/members")
+                .then()
+                .statusCode(200)
+                .extract().asString();
+        assertTrue(response.contains("Jack"));
+    }
+    @Test
+    void viewTeamCalendar_returns200() {
+        String employer = register(uniqueEmail(), "BOB", "EMPLOYER");
+        String vacationId = createTeamWithVacation(employer, uniqueEmail(), "calendarTeam");
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "APPROVED"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(200);
+        String response = given()
+                .header("Authorization", "Bearer " + employer)
+                .when()
+                .get("/api/teams/calendar")
+                .then()
+                .statusCode(200)
+                .extract().asString();
+        assertTrue(response.contains("APPROVED"));
+    }
+
+    @Test
+    void joinTeam_whenAlreadyMemberOfAnyTeam_returns409() {
+        String employer = register(uniqueEmail(), "BOB", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "membersTeam");
+        String employee = register(uniqueEmail(), "Jack", "EMPLOYEE");
+        inviteUser(employee, inviteCode);
+        String errorBody = given()
+                .header("Authorization", "Bearer " + employee)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"inviteCode": "%s"}
+                        """.formatted(inviteCode))
+                .when()
+                .post("/api/teams/join")
+                .then()
+                .statusCode(409)
+                .extract().asString();
+        assertTrue(errorBody.contains("You are already a member of a team"));
+    }
 }
