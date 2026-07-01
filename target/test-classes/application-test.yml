@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+jwt:
+  secret: test-secret-key-for-integration-tests-0123456789
+  expiration: 3600000
+  refresh-expiration: 86400000
