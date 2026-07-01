@@ -179,4 +179,28 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .extract().path("find { it.role == 'EMPLOYER' }.totalDays");
         assertEquals(15, employerTotalDays);
     }
+
+    @Test
+    void usedDays_reflectApprovedVacation() {
+        String employer = register("usedDaysEmployer@mail.ru", "CEO", "EMPLOYER");
+        String vacationId = createTeamWithVacation(employer, "usedDaysEmployee@mail.ru", "usedDaysTeam");
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "APPROVED"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(200);
+        int usedDays = given()
+                .header("Authorization", "Bearer " + employer)
+                .when()
+                .get("/api/teams/members")
+                .then()
+                .statusCode(200)
+                .extract().path("find { it.role == 'EMPLOYEE' }.usedDays");
+        assertEquals(10, usedDays);
+    }
 }
