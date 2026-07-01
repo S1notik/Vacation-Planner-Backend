@@ -261,4 +261,83 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
         assertTrue(response.contains("PENDING"));
     }
 
+    @Test
+    void createVacation_whenNotEnoughDays_returns400() {
+        String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "notEnoughTeam");
+        String employee = register(uniqueEmail(), "Worker", "EMPLOYEE");
+        inviteUser(employee, inviteCode);
+        String response = given()
+                .header("Authorization", "Bearer " + employee)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"startDate": "2026-01-01", "endDate": "2026-12-31"}
+                        """)
+                .when()
+                .post("/api/vacations")
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(response.contains("Not enough vacation days"));
+    }
+
+    @Test
+    void deleteVacation_ownRequest_returns200() {
+        String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "delTeam");
+        String employee = register(uniqueEmail(), "Worker", "EMPLOYEE");
+        inviteUser(employee, inviteCode);
+        String vacationId = createVacation(employee, "2026-08-01", "2026-08-10");
+        given()
+                .header("Authorization", "Bearer " + employee)
+                .when()
+                .delete("/api/vacations/{id}", vacationId)
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    void deleteVacation_alreadyApproved_returns400() {
+        String employer = register(uniqueEmail(), "Bob", "EMPLOYER");
+        String inviteCode = createTeamAndGetInviteCode(employer, "delTeam");
+        String employee = register(uniqueEmail(), "Worker", "EMPLOYEE");
+        inviteUser(employee, inviteCode);
+        String vacationId = createVacation(employee, "2026-08-01", "2026-08-10");
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "APPROVED"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(200);
+        String errorBody = given()
+                .header("Authorization", "Bearer " + employee)
+                .when()
+                .delete("/api/vacations/{id}", vacationId)
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(errorBody.contains("Only pending vacation requests can be cancelled"));
+    }
+
+    @Test
+    void reviewVacation_approve_returns200() {
+        String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
+        String vacationId = createTeamWithVacation(employer, uniqueEmail(), "reviewApproveTeam");
+
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "APPROVED"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(200)
+                .body("status", org.hamcrest.Matchers.equalTo("APPROVED"));
+    }
 }
