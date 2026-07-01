@@ -133,6 +133,6 @@ public class TeamIntegrationTest extends AbstractIntegrationTest {
                 .then()
                 .statusCode(409)
                 .extract().asString();
-        System.out.println("Error: "+ errorBody);
+        assertTrue(errorBody.contains("You already have a team"));
     }
 }
