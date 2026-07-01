@@ -43,6 +43,7 @@ public class GlobalExceptionHandler {
             case "Vacation balance not found" -> HttpStatus.NOT_FOUND;
             case "User is not in a team" -> HttpStatus.BAD_REQUEST;
             case "End date cannot be before start date" -> HttpStatus.BAD_REQUEST;
+            case "Invalid status" -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
 

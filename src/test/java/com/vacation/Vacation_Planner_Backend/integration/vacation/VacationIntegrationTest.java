@@ -14,21 +14,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     void createVacation_withValidData_returns200() {
         String employerToken = register("vacemployer@mail.ru", "CEO", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employerToken, "vacTeam");
-
         String employeeToken = register("vacemployee@mail.ru", "Worker", "EMPLOYEE");
         inviteUser(employeeToken, inviteCode);
-
-        String vacationId = given()
-                .header("Authorization", "Bearer " + employeeToken)
-                .contentType(ContentType.JSON)
-                .body("""
-                        {"startDate": "2026-08-01", "endDate": "2026-08-10"}
-                        """)
-                .when()
-                .post("/api/vacations")
-                .then()
-                .statusCode(200)
-                .extract().path("id");
+        String vacationId = createVacation(employeeToken, "2026-08-01", "2026-08-10");
         assertNotNull(vacationId);
     }
 
@@ -36,26 +24,11 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     void employerCannotReviewVacationFromAnotherTeam() {
         // team B
         String employerB = register("isoEmployerB@mail.ru", "BossB", "EMPLOYER");
-        String inviteCodeB = createTeamAndGetInviteCode(employerB, "teamB");
-        String employeeB = register("isoEmployeeB@mail.ru", "WorkerB", "EMPLOYEE");
-        inviteUser(employeeB, inviteCodeB);
-
-        String vacationIdB = given()
-                .header("Authorization", "Bearer " + employeeB)
-                .contentType(ContentType.JSON)
-                .body("""
-                        {"startDate": "2026-08-01", "endDate": "2026-08-10"}
-                        """)
-                .when()
-                .post("/api/vacations")
-                .then()
-                .statusCode(200)
-                .extract().path("id");
+        String vacationIdB = createTeamWithVacation(employerB, "isoEmployeeB@mail.ru", "teamB");
 
         // team A
         String employerA = register("isoEmployerA@mail.ru", "BossA", "EMPLOYER");
-
-        String vacationResponse = given()
+        String response = given()
                 .header("Authorization", "Bearer " + employerA)
                 .contentType(ContentType.JSON)
                 .body("""
@@ -66,7 +39,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .then()
                 .statusCode(403)
                 .extract().asString();
-        assertTrue(vacationResponse.contains("Access denied"));
+        assertTrue(response.contains("Access denied"));
     }
 
     @Test
@@ -134,6 +107,25 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .statusCode(400)
                 .extract().asString();
         assertTrue(response.contains("End date cannot be before start date"));
+    }
+
+    @Test
+    void reviewVacation_withInvalidStatus_returns400() {
+        String employer = register("reviewEmployer@mail.ru", "CEO", "EMPLOYER");
+        String vacationId = createTeamWithVacation(employer, "reviewStatusEmployee@mail.ru",
+                "reviewTeam");
+        String errorBody = given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"status": "APPLE"}
+                        """)
+                .when()
+                .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(errorBody.contains("Invalid status"));
     }
 
 }

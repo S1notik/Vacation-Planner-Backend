@@ -78,4 +78,22 @@ public abstract class AbstractIntegrationTest {
                 .statusCode(200)
                 .extract().asString();
     }
+
+    protected String createVacation(String employeeToken, String startDate, String endDate) {
+        return given()
+                .header("Authorization", "Bearer " + employeeToken)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"startDate": "%s", "endDate": "%s"}
+                        """.formatted(startDate, endDate))
+                .when().post("/api/vacations")
+                .then().statusCode(200).extract().path("id");
+    }
+
+    protected String createTeamWithVacation(String employerToken, String employeeEmail, String teamName) {
+        String inviteCode = createTeamAndGetInviteCode(employerToken, teamName);
+        String employeeToken = register(employeeEmail, "Worker", "EMPLOYEE");
+        inviteUser(employeeToken, inviteCode);
+        return createVacation(employeeToken, "2026-08-01", "2026-08-10");
+    }
 }

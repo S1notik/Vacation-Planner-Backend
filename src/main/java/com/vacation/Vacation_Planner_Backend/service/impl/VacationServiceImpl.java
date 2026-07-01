@@ -160,7 +160,12 @@ public class VacationServiceImpl implements VacationService {
         }
 
         // Update status
-        Status newStatus = Status.valueOf(request.getStatus());
+        Status newStatus;
+        try {
+            newStatus = Status.valueOf(request.getStatus());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status");
+        }
         vacation.setStatus(newStatus);
         vacation.setReviewedBy(currentUser);
         vacation.setReviewedAt(java.time.LocalDateTime.now());
