@@ -5,8 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class VacationIntegrationTest extends AbstractIntegrationTest {
 
@@ -156,5 +155,28 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                 .statusCode(400)
                 .extract().asString();
         assertTrue(errorBody.contains("Vacation request is already reviewed"));
+    }
+
+    @Test
+    void setTeamBalance_alsoUpdatesEmployerBalance() {
+        String employer = register("teamBalEmployer@mail.ru", "CEO", "EMPLOYER");
+        createTeamAndGetInviteCode(employer, "teamBalTeam");
+
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .queryParam("totalDays", 15)
+                .when()
+                .put("/api/vacations/balance/team")
+                .then()
+                .statusCode(200);
+
+        int employerTotalDays = given()
+                .header("Authorization", "Bearer " + employer)
+                .when()
+                .get("/api/teams/members")
+                .then()
+                .statusCode(200)
+                .extract().path("find { it.role == 'EMPLOYER' }.totalDays");
+        assertEquals(15, employerTotalDays);
     }
 }

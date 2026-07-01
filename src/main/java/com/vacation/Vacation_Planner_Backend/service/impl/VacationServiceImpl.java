@@ -282,14 +282,22 @@ public class VacationServiceImpl implements VacationService {
 
         int currentYear = LocalDate.now().getYear();
 
+        List<User> users = new java.util.ArrayList<>(
+                teamMemberRepository.findByTeam(team).stream()
+                        .map(TeamMember::getUser)
+                        .toList()
+        );
+
+        users.add(team.getEmployer());
+
+
         // Update balance for all team members
-        return teamMemberRepository.findByTeam(team)
-                .stream()
-                .map(member -> {
+        return users.stream()
+                .map(user -> {
                     VacationBalance balance = vacationBalanceRepository
-                            .findByUserAndYear(member.getUser(), currentYear)
+                            .findByUserAndYear(user, currentYear)
                             .orElse(VacationBalance.builder()
-                                    .user(member.getUser())
+                                    .user(user)
                                     .year(currentYear)
                                     .usedDays(0)
                                     .build());
