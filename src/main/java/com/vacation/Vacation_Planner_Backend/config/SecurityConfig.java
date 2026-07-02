@@ -41,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/vacations/balance").authenticated()
                         .requestMatchers("/api/vacations/team").authenticated()
                         .requestMatchers("/api/vacations/*/review").authenticated()
+                        .requestMatchers("/api/vacations/my").authenticated()
                         .anyRequest().authenticated()
                 )
                 // Set authentication provider
