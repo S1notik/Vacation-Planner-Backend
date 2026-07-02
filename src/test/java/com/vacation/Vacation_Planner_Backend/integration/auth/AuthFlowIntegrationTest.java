@@ -1,7 +1,9 @@
 package com.vacation.Vacation_Planner_Backend.integration.auth;
 
 import com.vacation.Vacation_Planner_Backend.integration.AbstractIntegrationTest;
+import io.qameta.allure.*;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -11,6 +13,8 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Epic("Vacation Planner API")
+@Feature("Authentication")
 public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
 
     @ParameterizedTest
@@ -18,6 +22,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
             "employer@mail.ru, CEO, EMPLOYER",
             "employee@mail.ru, Worker, EMPLOYEE"
     })
+    @Story("Регистрация пользователя")
+    @DisplayName("Регистрация с валидными данными, возвращает токен")
+    @Severity(SeverityLevel.CRITICAL)
     void register_withValidData_returns200AndToken(String email, String name, String role) {
         String body = """
                 {"email": "%s", "password": "password123", "name": "%s", "role": "%s"}
@@ -37,6 +44,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
 
 
     @Test
+    @Story("Регистрация пользователя")
+    @DisplayName("Регистрация работодателя уже с существующим email, возвращает 409")
+    @Severity(SeverityLevel.NORMAL)
     void registerEmployer_withDuplicateEmail_returns409() {
         register("dup@mail.ru", "Worker", "EMPLOYER");
 
@@ -55,6 +65,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Регистрация пользователя")
+    @DisplayName("Регистрация сотрудника уже с существующим email, возвращает 409")
+    @Severity(SeverityLevel.NORMAL)
     void registerEmployee_withDuplicateEmail_returns409() {
         register("dupemp@mail.ru", "Worker", "EMPLOYEE");
 
@@ -73,6 +86,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Вход пользователя")
+    @DisplayName("Вход работодателя с валидными данными, возвращает токен")
+    @Severity(SeverityLevel.CRITICAL)
     void loginEmployer_withValidData_returns200AndToken() {
         register("loginemployer@mail.ru", "Worker", "EMPLOYER");
 
@@ -91,6 +107,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Вход пользователя")
+    @DisplayName("Вход сотрудника с валидными данными, возвращает токен")
+    @Severity(SeverityLevel.CRITICAL)
     void loginEmployee_withValidData_returns200AndToken() {
         register("loginemployee@mail.ru", "Worker", "EMPLOYEE");
 
@@ -109,6 +128,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Вход пользователя")
+    @DisplayName("Вход пользователя с несуществующим email, возвращает 401")
+    @Severity(SeverityLevel.CRITICAL)
     void login_withNonexistentEmail_returns401() {
         String body = """
                 {"email": "ghost@mail.ru", "password": "password123"}
@@ -126,6 +148,9 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Вход пользователя")
+    @DisplayName("Вход пользователя с неправильным паролем, возвращает 401")
+    @Severity(SeverityLevel.CRITICAL)
     void login_withWrongPassword_returns401() {
         String body = """
                 {"email": "real@mail.ru", "password": "wrongpassword"}
@@ -143,4 +168,73 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(responseBody.contains("Unauthorized"));
     }
 
+    @Test
+    @Story("Вход пользователя")
+    @DisplayName("Регистрация пользователя со слабым паролем, возвращает 400")
+    @Severity(SeverityLevel.NORMAL)
+    void register_withWeakPassword_return400() {
+        String body = """
+                {"email": "weakpassword@mail.ru", "password": "123", "name": "Karina", "role": "EMPLOYER"}
+                """;
+        String errorBody = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/api/auth/register")
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(errorBody.contains("Пароль минимум 8 символов"));
+    }
+
+    @Test
+    @Story("Обновление токена")
+    @DisplayName("Обновление токена по refresh-токену, возвращает новый access-токен")
+    @Severity(SeverityLevel.CRITICAL)
+    void refresh_withValidToken_returns200() {
+        String refreshToken = given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"email": "%s", "password": "password123", "name": "R", "role": "EMPLOYEE"}
+                        """.formatted(uniqueEmail()))
+                .when()
+                .post("/api/auth/register")
+                .then()
+                .statusCode(200)
+                .extract().path("refreshToken");
+
+        String newAccessToken = given()
+                .header("Authorization", "Bearer " + refreshToken)
+                .when()
+                .post("/api/auth/refresh")
+                .then()
+                .statusCode(200)
+                .extract().path("accessToken");
+        assertNotNull(newAccessToken);
+    }
+
+    @Test
+    @Story("Защита эндпоинтов")
+    @DisplayName("Запрос без токена, возвращает 403")
+    @Severity(SeverityLevel.BLOCKER)
+    void protectedEndpoint_withoutToken_returns403() {
+        given()
+                .when()
+                .get("/api/vacations/balance")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    @Story("Защита эндпоинтов")
+    @DisplayName("Запрос с битым токеном, возвращает 403")
+    @Severity(SeverityLevel.BLOCKER)
+    void protectedEndpoint_withInvalidToken_returns403() {
+        given()
+                .header("Authorization", "Bearer garbage.invalid.token")
+                .when()
+                .get("/api/vacations/balance")
+                .then()
+                .statusCode(403);
+    }
 }

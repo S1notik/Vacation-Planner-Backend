@@ -34,6 +34,7 @@ public abstract class AbstractIntegrationTest {
     void setUpRestAssured() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
+        RestAssured.replaceFiltersWith(new io.qameta.allure.restassured.AllureRestAssured());
     }
 
     protected String register(String email, String name, String role) {
@@ -95,5 +96,9 @@ public abstract class AbstractIntegrationTest {
         String employeeToken = register(employeeEmail, "Worker", "EMPLOYEE");
         inviteUser(employeeToken, inviteCode);
         return createVacation(employeeToken, "2026-08-01", "2026-08-10");
+    }
+
+    protected String uniqueEmail() {
+        return "user-" + java.util.UUID.randomUUID() + "@mail.ru";
     }
 }
