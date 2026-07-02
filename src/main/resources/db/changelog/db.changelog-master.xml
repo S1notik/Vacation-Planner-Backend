@@ -13,6 +13,6 @@
     <include file="db/changelog/1.0/2026-04-14-create-google-calendar-token.xml"/>
     <include file="db/changelog/1.0/2026-04-14-create-vacation-requests.xml"/>
     <include file="db/changelog/1.0/2026-04-14-create-documents.xml"/>
-
+    <include file="db/changelog/1.1/2026-07-03-add-user-profile-fields.xml"/>
 
 </databaseChangeLog>

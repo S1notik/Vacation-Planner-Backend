@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-07-03-add-user-profile-fields" author="S1notik">
+        <addColumn tableName="users">
+            <column name="phone" type="varchar(20)"/>
+            <column name="job_title" type="varchar(100)"/>
+            <column name="avatar_url" type="varchar(512)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

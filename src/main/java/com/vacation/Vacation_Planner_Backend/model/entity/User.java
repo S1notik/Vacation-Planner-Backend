@@ -40,6 +40,15 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "job_title", length = 100)
+    private String jobTitle;
+
+    @Column(name = "avatar_url", length = 512)
+    private String avatarUrl;
+
     @Column(name = "google_id", length = 255)
     private String googleId;
 
