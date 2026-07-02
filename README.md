@@ -1,41 +1,87 @@
 # Vacation Planner — Backend
 
-REST API для управления отпусками сотрудников. Позволяет работодателям создавать команды, управлять заявками на отпуск и балансом дней, а сотрудникам — подавать и отслеживать свои заявки.
+REST API для управления отпусками сотрудников. Работодатели создают команды, управляют заявками на отпуск и балансом дней; сотрудники подают и отслеживают свои заявки.
+
+> Android — в [отдельном репозитории](https://github.com/S1notik/Vacation-Planner-Android).
 
 ---
 
 ## Стек
 
+### Основа
+
 ![Java](https://img.shields.io/badge/Java_25-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis_7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+
+### Инфраструктура
+
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 ![Liquibase](https://img.shields.io/badge/Liquibase-2962FF?style=for-the-badge&logo=liquibase&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
-![Lombok](https://img.shields.io/badge/Lombok-BC4521?style=for-the-badge&logo=lombok&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+### Тестирование
 
----
+![JUnit5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
+![Testcontainers](https://img.shields.io/badge/Testcontainers-291A38?style=for-the-badge&logo=testcontainers&logoColor=white)
+![REST Assured](https://img.shields.io/badge/REST_Assured-47A248?style=for-the-badge&logoColor=white)
+![Allure](https://img.shields.io/badge/Allure-FF7A00?style=for-the-badge&logoColor=white)
+ 
 
 ## Архитектура
 
-Проект построен по принципу **Clean Architecture** с разделением на слои:
+Многослойная структура с разделением ответственности:
 
 ```
 config/          — конфигурация Spring (Security, Redis)
-security/        — JWT фильтр, сервис токенов, blacklist
-controller/      — REST контроллеры
+security/        — JWT-фильтр, сервис токенов, blacklist
+controller/      — REST-контроллеры
 service/         — интерфейсы бизнес-логики
 service/impl/    — реализация сервисов
-model/entity/    — JPA сущности
+model/entity/    — JPA-сущности
 model/enums/     — перечисления (Role, Status, NotificationType)
 repository/      — Spring Data JPA репозитории
 dto/             — объекты передачи данных (Request/Response)
 exception/       — глобальная обработка ошибок
 ```
 
+Схема БД управляется миграциями **Liquibase** (single source of truth), Hibernate работает в режиме `ddl-auto: validate`.
+ 
+---
+
+## Тестирование
+
+**37 интеграционных тестов**, покрывающих аутентификацию, работу с командами и полный цикл заявок на отпуск, включая проверки изоляции данных между командами.
+
+Тесты выполняются на **реальном PostgreSQL** в Docker-контейнере (не in-memory), поэтому проверяют в том числе миграции Liquibase и специфику Postgres.
+
+**Стек тестирования:**
+- **Testcontainers** — поднимает реальный PostgreSQL в контейнере на время тестов (singleton-контейнер, общий для всех классов);
+- **REST Assured** — HTTP-запросы к приложению и проверка ответов;
+- **JUnit 5** — каркас тестов, параметризация;
+- **Mockito** (`@MockitoBean`) — подмена внешних зависимостей (Redis blacklist);
+- **Allure** — отчётность с группировкой по фичам, severity и логированием HTTP-запросов.
+  **Что покрыто:**
+- **Auth** — регистрация, вход, обновление токена, валидация пароля, защита эндпоинтов (без токена / с битым токеном → 403);
+- **Teams** — создание, вступление по инвайт-коду, участники, календарь, повторное вступление;
+- **Vacations** — подача/просмотр/отзыв заявок, ревью, баланс дней, единый учёт использованных дней;
+- **Безопасность** — изоляция данных между командами (работодатель не может ревьюить чужую заявку или менять чужой баланс → 403).
+  Запуск тестов:
+```bash
+mvn clean test
+```
+
+Отчёт Allure:
+```bash
+allure serve target/allure-results
+```
+
+![Allure Overview](docs/allure-overview.png)
+![Allure Test Detail](docs/allure-test-detail.png)
+![Allure Graphs](docs/allure-graphs.png)
+ 
 ---
 
 ## API Endpoints
@@ -74,7 +120,7 @@ exception/       — глобальная обработка ошибок
 | GET | `/api/notifications` | Получить уведомления |
 | PATCH | `/api/notifications/{id}/read` | Прочитать уведомление |
 | PATCH | `/api/notifications/read-all` | Прочитать все |
-
+ 
 ---
 
 ## Запуск проекта
@@ -82,11 +128,10 @@ exception/       — глобальная обработка ошибок
 ### Требования
 - Docker
 - Docker Compose
-
 ### 1. Клонировать репозиторий
 ```bash
-git clone https://github.com/your-repo/vacation-planner-backend.git
-cd vacation-planner-backend
+git clone https://github.com/S1notik/Vacation-Planner-Backend.git
+cd Vacation-Planner-Backend
 ```
 
 ### 2. Создать `.env` файл в корне проекта
@@ -105,18 +150,18 @@ JWT_REFRESH_EXPIRATION=2592000000
 docker compose up --build
 ```
 
-Приложение будет доступно на `http://localhost:8080`
-
+Приложение будет доступно на `http://localhost:8080`.
+ 
 ---
 
 ## Безопасность
 
-- **JWT токены** — stateless аутентификация
-- **Redis Blacklist** — отзыв токенов при logout
-- **BCrypt** — хэширование паролей
-- **Role-based access** — разграничение прав через `@PreAuthorize`
-- **Validation** — валидация входящих данных через `@Valid`
-
+- **JWT-токены** — stateless аутентификация (access + refresh);
+- **Redis Blacklist** — отзыв токенов при logout;
+- **BCrypt** — хэширование паролей;
+- **Role-based access** — разграничение прав через `@PreAuthorize`;
+- **Изоляция данных** — пользователь имеет доступ только к данным своей команды (проверяется на уровне сервиса, покрыто тестами);
+- **Валидация** — проверка входящих данных через `@Valid`.
 ---
 
 ## Роли пользователей
