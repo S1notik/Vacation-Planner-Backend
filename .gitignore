@@ -46,3 +46,4 @@ bin/
 .env
 target/
 ajcore.*.txt
+allure-results/
