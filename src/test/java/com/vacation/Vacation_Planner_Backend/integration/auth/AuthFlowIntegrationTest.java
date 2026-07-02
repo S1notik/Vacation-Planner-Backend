@@ -143,4 +143,61 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
         assertTrue(responseBody.contains("Unauthorized"));
     }
 
+    @Test
+    void register_withWeakPassword_return400() {
+        String body = """
+                {"email": "weakpassword@mail.ru", "password": "123", "name": "Karina", "role": "EMPLOYER"}
+                """;
+        String errorBody = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/api/auth/register")
+                .then()
+                .statusCode(400)
+                .extract().asString();
+        assertTrue(errorBody.contains("Пароль минимум 8 символов"));
+    }
+
+    @Test
+    void refresh_withValidToken_returns200() {
+        String refreshToken = given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"email": "%s", "password": "password123", "name": "R", "role": "EMPLOYEE"}
+                        """.formatted(uniqueEmail()))
+                .when()
+                .post("/api/auth/register")
+                .then()
+                .statusCode(200)
+                .extract().path("refreshToken");
+
+        String newAccessToken = given()
+                .header("Authorization", "Bearer " + refreshToken)
+                .when()
+                .post("/api/auth/refresh")
+                .then()
+                .statusCode(200)
+                .extract().path("accessToken");
+        assertNotNull(newAccessToken);
+    }
+
+    @Test
+    void protectedEndpoint_withoutToken_returns403() {
+        given()
+                .when()
+                .get("/api/vacations/balance")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void protectedEndpoint_withInvalidToken_returns403() {
+        given()
+                .header("Authorization", "Bearer garbage.invalid.token")
+                .when()
+                .get("/api/vacations/balance")
+                .then()
+                .statusCode(403);
+    }
 }
