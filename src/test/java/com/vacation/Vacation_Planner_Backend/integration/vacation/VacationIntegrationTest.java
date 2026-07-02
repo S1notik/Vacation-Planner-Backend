@@ -1,15 +1,22 @@
 package com.vacation.Vacation_Planner_Backend.integration.vacation;
 
 import com.vacation.Vacation_Planner_Backend.integration.AbstractIntegrationTest;
+import io.qameta.allure.*;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Epic("Vacation Planner API")
+@Feature("Vacation Management")
 public class VacationIntegrationTest extends AbstractIntegrationTest {
 
     @Test
+    @Story("Создание отпуска")
+    @DisplayName("Создание отпуска с валидными данными, возвращает 200")
+    @Severity(SeverityLevel.CRITICAL)
     void createVacation_withValidData_returns200() {
         String employerToken = register("vacemployer@mail.ru", "CEO", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employerToken, "vacTeam");
@@ -20,6 +27,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Изоляция данных между командами")
+    @DisplayName("Работодатель не может ревьюить заявку чужой команды, возвращает 403")
+    @Severity(SeverityLevel.BLOCKER)
     void employerCannotReviewVacationFromAnotherTeam() {
         // team B
         String employerB = register("isoEmployerB@mail.ru", "BossB", "EMPLOYER");
@@ -42,6 +52,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Изоляция данных между командами")
+    @DisplayName("Работодатель не может менять баланс сотрудника чужой команды, возвращает403")
+    @Severity(SeverityLevel.BLOCKER)
     void employerCannotSetBalanceForEmployeeFromAnotherTeam() {
         // team B
         String employerB = register("balEmployerB@mail.ru", "BossB", "EMPLOYER");
@@ -72,6 +85,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Создание отпуска")
+    @DisplayName("Создание отпуска вне команды, возвращает 400")
+    @Severity(SeverityLevel.NORMAL)
     void createVacation_whenNotInTeam_returns400() {
         String employee = register("notInTeamEmployee@mail.ru", "WorkerA", "EMPLOYEE");
         String errorBody = given()
@@ -89,6 +105,8 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Создание отпуска")
+    @DisplayName("Создание отпуска с датой конца раньше начала, возвращает 400")
     void createVacation_withEndDateBeforeStartDate_returns400() {
         String employer = register("dateEmployer@mail.ru", "CEO", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employer, "dateTeam");
@@ -109,6 +127,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Ревью отпуска")
+    @DisplayName("Ревью с невалидным статусом, возвращает 400")
+    @Severity(SeverityLevel.NORMAL)
     void reviewVacation_withInvalidStatus_returns400() {
         String employer = register("reviewEmployer@mail.ru", "CEO", "EMPLOYER");
         String vacationId = createTeamWithVacation(employer, "reviewStatusEmployee@mail.ru",
@@ -128,6 +149,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Ревью отпуска")
+    @DisplayName("Повторное ревью заявки, возвращает 400")
+    @Severity(SeverityLevel.NORMAL)
     void reviewVacation_whenAlreadyReviewed_returns400() {
         String employer = register("doubleReviewEmployer@mail.ru", "CEO", "EMPLOYER");
         String vacationId = createTeamWithVacation(employer, "doubleReviewEmployee@mail.ru",
@@ -158,6 +182,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Баланс отпусков")
+    @DisplayName("Установка баланса команды включает работодателя")
+    @Severity(SeverityLevel.CRITICAL)
     void setTeamBalance_alsoUpdatesEmployerBalance() {
         String employer = register("teamBalEmployer@mail.ru", "CEO", "EMPLOYER");
         createTeamAndGetInviteCode(employer, "teamBalTeam");
@@ -181,6 +208,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Баланс отпусков")
+    @DisplayName("usedDays отражает одобренный отпуск")
+    @Severity(SeverityLevel.CRITICAL)
     void usedDays_reflectApprovedVacation() {
         String employer = register("usedDaysEmployer@mail.ru", "CEO", "EMPLOYER");
         String vacationCode = createTeamWithVacation(employer, "usedDaysEmployee@mail.ru", "usedDaysTeam");
@@ -205,6 +235,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Просмотр отпусков")
+    @DisplayName("Сотрудник видит свои заявки на отпуск")
+    @Severity(SeverityLevel.CRITICAL)
     void viewMyVacation_returns200() {
         String employer = register("userVacEmployer@mail.ru", "Geralt", "EMPLOYER");
         String vacationCode = createTeamAndGetInviteCode(employer, "userVacTeam");
@@ -220,6 +253,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Баланс отпусков")
+    @DisplayName("Сотрудник видит свой баланс (28 дней по умолчанию)")
+    @Severity(SeverityLevel.CRITICAL)
     void viewEmployeeBalance_returns200() {
         String employer = register("balanceEmployer@mail.ru", "Geralt", "EMPLOYER");
         String vacationCode = createTeamAndGetInviteCode(employer, "BalanceTeam");
@@ -236,6 +272,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Просмотр отпусков")
+    @DisplayName("Сотрудник не может смотреть отпуска команды, возвращает 403")
+    @Severity(SeverityLevel.NORMAL)
     void viewTeamVacations_asEmployee_returns403() {
         String employee = register("teamViewEmployee@mail.ru", "Worker", "EMPLOYEE");
 
@@ -248,6 +287,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Просмотр отпусков")
+    @DisplayName("Работодатель видит заявки своей команды")
+    @Severity(SeverityLevel.CRITICAL)
     void viewTeamVacations_asEmployer_returns200() {
         String employer = register("teamViewHappyEmployer@mail.ru", "CEO", "EMPLOYER");
         createTeamWithVacation(employer, "teamViewHappyEmployee@mail.ru", "teamViewHappyTeam");
@@ -262,6 +304,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Создание отпуска")
+    @DisplayName("Создание отпуска при нехватке дней, возвращает 400")
+    @Severity(SeverityLevel.NORMAL)
     void createVacation_whenNotEnoughDays_returns400() {
         String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employer, "notEnoughTeam");
@@ -282,6 +327,8 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Отмена отпуска")
+    @DisplayName("Отмена своей заявки, возвращает 200")
     void deleteVacation_ownRequest_returns200() {
         String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employer, "delTeam");
@@ -297,6 +344,9 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Отмена отпуска")
+    @DisplayName("Нельзя отменить уже одобренную заявку, возвращает 400")
+    @Severity(SeverityLevel.NORMAL)
     void deleteVacation_alreadyApproved_returns400() {
         String employer = register(uniqueEmail(), "Bob", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employer, "delTeam");
@@ -324,6 +374,8 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Story("Ревью отпуска")
+    @DisplayName("Одобрение заявки возвращает 200 и статус APPROVED")
     void reviewVacation_approve_returns200() {
         String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
         String vacationId = createTeamWithVacation(employer, uniqueEmail(), "reviewApproveTeam");

@@ -34,6 +34,7 @@ public abstract class AbstractIntegrationTest {
     void setUpRestAssured() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
+        RestAssured.replaceFiltersWith(new io.qameta.allure.restassured.AllureRestAssured());
     }
 
     protected String register(String email, String name, String role) {
