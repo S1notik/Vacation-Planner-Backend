@@ -160,4 +160,19 @@ public class TeamIntegrationTest extends AbstractIntegrationTest {
                 .extract().asString();
         assertTrue(errorBody.contains("You already have a team"));
     }
+
+    @Test
+    @Story("Создание команды")
+    @DisplayName("Создание команды повышает роль сотрудника до работодателя")
+    @Severity(SeverityLevel.NORMAL)
+    void createTeam_promotesEmployeeToEmployer() {
+        String token = register(uniqueEmail(), "Worker", "EMPLOYEE");
+        createTeamAndGetInviteCode(token, "promoteTeam");
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/api/vacations/team")
+                .then()
+                .statusCode(200);
+    }
 }

@@ -4,11 +4,9 @@ import com.vacation.Vacation_Planner_Backend.dto.team.request.CreateTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.request.JoinTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.response.*;
 import com.vacation.Vacation_Planner_Backend.model.entity.*;
+import com.vacation.Vacation_Planner_Backend.model.enums.Role;
 import com.vacation.Vacation_Planner_Backend.model.enums.Status;
-import com.vacation.Vacation_Planner_Backend.repository.TeamMemberRepository;
-import com.vacation.Vacation_Planner_Backend.repository.TeamRepository;
-import com.vacation.Vacation_Planner_Backend.repository.VacationBalanceRepository;
-import com.vacation.Vacation_Planner_Backend.repository.VacationRequestRepository;
+import com.vacation.Vacation_Planner_Backend.repository.*;
 import com.vacation.Vacation_Planner_Backend.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,7 @@ public class TeamServiceImpl implements TeamService {
     private final TeamMemberRepository teamMemberRepository;
     private final VacationRequestRepository vacationRequestRepository;
     private final VacationBalanceRepository vacationBalanceRepository;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -50,6 +49,8 @@ public class TeamServiceImpl implements TeamService {
                 .inviteQrUrl("vacationplanner://join?code=" + inviteCode)
                 .build();
         teamRepository.save(team);
+        currentUser.setRole(Role.EMPLOYER);
+        userRepository.save(currentUser);
         return new CreateTeamResponse(
                 team.getId(),
                 team.getName(),
