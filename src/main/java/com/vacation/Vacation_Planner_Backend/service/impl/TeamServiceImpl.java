@@ -3,6 +3,9 @@ package com.vacation.Vacation_Planner_Backend.service.impl;
 import com.vacation.Vacation_Planner_Backend.dto.team.request.CreateTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.request.JoinTeamRequest;
 import com.vacation.Vacation_Planner_Backend.dto.team.response.*;
+import com.vacation.Vacation_Planner_Backend.exception.BadRequestException;
+import com.vacation.Vacation_Planner_Backend.exception.ConflictException;
+import com.vacation.Vacation_Planner_Backend.exception.NotFoundException;
 import com.vacation.Vacation_Planner_Backend.model.entity.*;
 import com.vacation.Vacation_Planner_Backend.model.enums.Role;
 import com.vacation.Vacation_Planner_Backend.model.enums.Status;
@@ -31,12 +34,12 @@ public class TeamServiceImpl implements TeamService {
     public CreateTeamResponse createTeam(CreateTeamRequest request, User currentUser) {
         // Check if user already owns a team
         if (teamRepository.findByEmployer(currentUser).isPresent()) {
-            throw new RuntimeException("You already have a team");
+            throw new ConflictException("You already have a team");
         }
 
         // Check if user is already a member of another team
         if (!teamMemberRepository.findByUser(currentUser).isEmpty()) {
-            throw new RuntimeException("You are already a member of a team");
+            throw new ConflictException("You are already a member of a team");
         }
 
         // Generate unique invite code
@@ -64,23 +67,23 @@ public class TeamServiceImpl implements TeamService {
     public JoinTeamResponse joinTeam(JoinTeamRequest request, User currentUser) {
         // Check if user already owns a team
         if (teamRepository.findByEmployer(currentUser).isPresent()) {
-            throw new RuntimeException("You already have a team");
+            throw new ConflictException("You already have a team");
         }
 
         // Check if user is already a member of any team
         if (!teamMemberRepository.findByUser(currentUser).isEmpty()) {
-            throw new RuntimeException("You are already a member of a team");
+            throw new ConflictException("You are already a member of a team");
         }
 
         // Find team by invite code
         Team team = teamRepository.findByInviteCode(request.getInviteCode())
-                .orElseThrow(() -> new RuntimeException("Invalid invite code"));
+                .orElseThrow(() -> new BadRequestException("Invalid invite code"));
 
         // Check if user already in team
         boolean alreadyMember = teamMemberRepository
                 .existsByTeamAndUser(team, currentUser);
         if (alreadyMember) {
-            throw new RuntimeException("Already a member of this team");
+            throw new ConflictException("Already a member of this team");
         }
         // Add user to team
         TeamMember member = TeamMember.builder()
@@ -113,11 +116,11 @@ public class TeamServiceImpl implements TeamService {
                         .stream()
                         .findFirst()
                         .map(TeamMember::getTeam)
-                        .orElseThrow(() -> new RuntimeException("Team not found")));
+                        .orElseThrow(() -> new NotFoundException("Team not found")));
 
         List<TeamMemberResponse> result = new ArrayList<>();
 
-        // Employer first (хранится в team.employer, не в team_members)
+        // Employer first
         result.add(toMemberResponse(team.getEmployer(), team.getCreatedAt().toString()));
 
         // Then members
@@ -159,14 +162,13 @@ public class TeamServiceImpl implements TeamService {
                         .stream()
                         .findFirst()
                         .map(TeamMember::getTeam)
-                        .orElseThrow(() -> new RuntimeException("Team not found")));
-
+                        .orElseThrow(() -> new NotFoundException("Team not found")));
         List<TeamCalendarResponse> result = new ArrayList<>();
-
         List<VacationPeriod> employerVacations = vacationRequestRepository
                 .findByUserAndStatus(team.getEmployer(), Status.APPROVED)
                 .stream()
-                .map(v -> new VacationPeriod(v.getStartDate(), v.getEndDate(), calculateDays(v), v.getStatus().name()))
+                .map(v -> new VacationPeriod(v.getStartDate(), v.getEndDate(), calculateDays(v),
+                        v.getStatus().name()))
                 .toList();
         result.add(new TeamCalendarResponse(team.getEmployer().getId(), team.getEmployer().getName(), employerVacations));
 
@@ -174,7 +176,8 @@ public class TeamServiceImpl implements TeamService {
             List<VacationPeriod> vacations = vacationRequestRepository
                     .findByUserAndStatus(member.getUser(), Status.APPROVED)
                     .stream()
-                    .map(v -> new VacationPeriod(v.getStartDate(), v.getEndDate(), calculateDays(v), v.getStatus().name()))
+                    .map(v -> new VacationPeriod(v.getStartDate(), v.getEndDate(), calculateDays(v),
+                            v.getStatus().name()))
                     .toList();
             result.add(new TeamCalendarResponse(member.getUser().getId(), member.getUser().getName(), vacations));
         });
@@ -192,7 +195,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamInfoResponse getTeamInfo(User currentUser) {
         Team team = teamRepository.findByEmployer(currentUser)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
+                .orElseThrow(() -> new NotFoundException("Team not found"));
         return new TeamInfoResponse(
                 team.getId(),
                 team.getName(),

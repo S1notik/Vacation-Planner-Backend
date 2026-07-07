@@ -4,6 +4,8 @@ import com.vacation.Vacation_Planner_Backend.dto.vacation.request.CreateVacation
 import com.vacation.Vacation_Planner_Backend.dto.vacation.request.ReviewVacationRequest;
 import com.vacation.Vacation_Planner_Backend.dto.vacation.response.VacationBalanceResponse;
 import com.vacation.Vacation_Planner_Backend.dto.vacation.response.VacationResponse;
+import com.vacation.Vacation_Planner_Backend.exception.BadRequestException;
+import com.vacation.Vacation_Planner_Backend.exception.NotFoundException;
 import com.vacation.Vacation_Planner_Backend.model.entity.*;
 import com.vacation.Vacation_Planner_Backend.model.enums.NotificationType;
 import com.vacation.Vacation_Planner_Backend.model.enums.Status;
@@ -40,7 +42,7 @@ public class VacationServiceImpl implements VacationService {
                         .stream()
                         .findFirst()
                         .map(TeamMember::getTeam)
-                        .orElseThrow(() -> new RuntimeException("User is not in a team")));
+                        .orElseThrow(() -> new BadRequestException("User is not in a team")));
         int currentYear = LocalDate.now().getYear();
         int usedDays = calculateUsedDays(currentUser, currentYear);
         VacationBalance balance = vacationBalanceRepository
@@ -55,11 +57,11 @@ public class VacationServiceImpl implements VacationService {
                     return vacationBalanceRepository.save(newBalance);
                 });
         if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new RuntimeException("End date cannot be before start date");
+            throw new BadRequestException("End date cannot be before start date");
         }
         long daysCount = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
         if (balance.getTotalDays() - usedDays < daysCount) {
-            throw new RuntimeException("Not enough vacation days");
+            throw new BadRequestException("Not enough vacation days");
         }
         boolean isEmployer = team.getEmployer().getId().equals(currentUser.getId());
         Status status = isEmployer ? Status.APPROVED : Status.PENDING;
@@ -116,7 +118,7 @@ public class VacationServiceImpl implements VacationService {
         int currentYear = LocalDate.now().getYear();
         VacationBalance balance = vacationBalanceRepository
                 .findByUserAndYear(currentUser, currentYear)
-                .orElseThrow(() -> new RuntimeException("Vacation balance not found"));
+                .orElseThrow(() -> new NotFoundException("Vacation balance not found"));
 
         int usedDays = calculateUsedDays(currentUser, currentYear);
         return new VacationBalanceResponse(
@@ -131,7 +133,7 @@ public class VacationServiceImpl implements VacationService {
     public List<VacationResponse> viewAllRequestToVacation(User currentUser) {
         // Find team where user is employer
         Team team = teamRepository.findByEmployer(currentUser)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
+                .orElseThrow(() -> new NotFoundException("Team not found"));
 
         return vacationRequestRepository.findByTeam(team)
                 .stream()
@@ -151,7 +153,7 @@ public class VacationServiceImpl implements VacationService {
     public VacationResponse reviewVacation(UUID vacationId, ReviewVacationRequest request, User currentUser) {
         // Find vacation request
         VacationRequest vacation = vacationRequestRepository.findById(vacationId)
-                .orElseThrow(() -> new RuntimeException("Vacation request not found"));
+                .orElseThrow(() -> new NotFoundException("Vacation request not found"));
 
         if (vacation.getTeam() == null
                 || vacation.getTeam().getEmployer() == null
@@ -160,7 +162,7 @@ public class VacationServiceImpl implements VacationService {
         }
 
         if (vacation.getStatus() != Status.PENDING) {
-            throw new RuntimeException("Vacation request is already reviewed");
+            throw new BadRequestException("Vacation request is already reviewed");
         }
 
         // Update status
@@ -168,7 +170,7 @@ public class VacationServiceImpl implements VacationService {
         try {
             newStatus = Status.valueOf(request.getStatus());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid status");
+            throw new BadRequestException("Invalid status");
         }
         vacation.setStatus(newStatus);
         vacation.setReviewedBy(currentUser);
@@ -206,14 +208,14 @@ public class VacationServiceImpl implements VacationService {
     public VacationResponse cancelVacation(UUID vacationId, User currentUser) {
         // Find vacation request
         VacationRequest vacation = vacationRequestRepository.findById(vacationId)
-                .orElseThrow(() -> new RuntimeException("Vacation request not found"));
+                .orElseThrow(() -> new BadRequestException("Vacation request not found"));
         // Only owner can cancel
         if (!vacation.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("You can only cancel your own vacation requests");
+            throw new AccessDeniedException("You can only cancel your own vacation requests");
         }
         // Only PENDING can be cancelled
         if (!vacation.isPending()) {
-            throw new RuntimeException("Only pending vacation requests can be cancelled");
+            throw new BadRequestException("Only pending vacation requests can be cancelled");
         }
         vacation.setStatus(Status.CANCELLED);
         vacationRequestRepository.save(vacation);
@@ -232,10 +234,10 @@ public class VacationServiceImpl implements VacationService {
     public VacationBalanceResponse setEmployeeBalance(UUID employeeId, int totalDays, User currentUser) {
         // Find employee
         User employee = userRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
 
         Team team = teamRepository.findByEmployer(currentUser)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
+                .orElseThrow(() -> new NotFoundException("Team not found"));
         boolean isOwnTeamMember = teamMemberRepository.existsByTeamAndUser(team, employee);
         boolean isSelf = employee.getId().equals(currentUser.getId());
         if (!isOwnTeamMember && !isSelf) {
@@ -268,7 +270,7 @@ public class VacationServiceImpl implements VacationService {
     public List<VacationBalanceResponse> setTeamBalance(int totalDays, User currentUser) {
         // Find employer's team
         Team team = teamRepository.findByEmployer(currentUser)
-                .orElseThrow(() -> new RuntimeException("Team not found"));
+                .orElseThrow(() -> new NotFoundException("Team not found"));
 
         int currentYear = LocalDate.now().getYear();
 
@@ -279,8 +281,6 @@ public class VacationServiceImpl implements VacationService {
         );
 
         users.add(team.getEmployer());
-
-
         // Update balance for all team members
         return users.stream()
                 .map(user -> {
@@ -291,10 +291,8 @@ public class VacationServiceImpl implements VacationService {
                                     .year(currentYear)
                                     .usedDays(0)
                                     .build());
-
                     balance.setTotalDays(totalDays);
                     vacationBalanceRepository.save(balance);
-
                     return new VacationBalanceResponse(
                             balance.getTotalDays(),
                             balance.getUsedDays(),
