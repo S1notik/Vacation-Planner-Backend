@@ -41,14 +41,14 @@ public class VacationController {
 
     // Employee views their vacation history
     @GetMapping("/my")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('EMPLOYER')")
     public ResponseEntity<List<VacationResponse>> viewVacationHistory() {
         return ResponseEntity.ok(vacationService.viewVacationHistory(getCurrentUser()));
     }
 
     // Employee views vacation balance
     @GetMapping("/balance")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('EMPLOYER')")
     public ResponseEntity<VacationBalanceResponse> viewVacationBalance() {
         return ResponseEntity.ok(vacationService.viewTotalVacationBalance(getCurrentUser()));
     }
@@ -71,7 +71,7 @@ public class VacationController {
 
     // Employee cancels vacation request
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('EMPLOYER')")
     public ResponseEntity<VacationResponse> cancelVacation(@PathVariable UUID id) {
         return ResponseEntity.ok(vacationService.cancelVacation(id, getCurrentUser()));
     }

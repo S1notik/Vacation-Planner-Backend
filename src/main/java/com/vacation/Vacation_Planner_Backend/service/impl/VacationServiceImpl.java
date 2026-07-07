@@ -61,24 +61,29 @@ public class VacationServiceImpl implements VacationService {
         if (balance.getTotalDays() - usedDays < daysCount) {
             throw new RuntimeException("Not enough vacation days");
         }
+        boolean isEmployer = team.getEmployer().getId().equals(currentUser.getId());
+        Status status = isEmployer ? Status.APPROVED : Status.PENDING;
         VacationRequest vacation = VacationRequest.builder()
                 .user(currentUser)
                 .team(team)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
-                .status(Status.PENDING)
+                .status(status)
                 .comment(request.getComment())
                 .build();
+
         vacationRequestRepository.save(vacation);
 
         // Notify employer about new vacation request
-        Notification notification = Notification.builder()
-                .user(team.getEmployer())
-                .type(NotificationType.VACATION_SUBMITTED)
-                .message("Сотрудник " + currentUser.getName() + " подал заявку на отпуск с "
-                        + request.getStartDate() + " по " + request.getEndDate())
-                .build();
-        notificationRepository.save(notification);
+        if (!isEmployer) {
+            Notification notification = Notification.builder()
+                    .user(team.getEmployer())
+                    .type(NotificationType.VACATION_SUBMITTED)
+                    .message("Сотрудник " + currentUser.getName() + " подал заявку на отпуск с "
+                            + request.getStartDate() + " по " + request.getEndDate())
+                    .build();
+            notificationRepository.save(notification);
+        }
         return new VacationResponse(
                 vacation.getId(),
                 vacation.getStartDate(),

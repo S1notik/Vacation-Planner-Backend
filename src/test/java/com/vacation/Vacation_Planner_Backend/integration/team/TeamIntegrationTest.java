@@ -175,4 +175,5 @@ public class TeamIntegrationTest extends AbstractIntegrationTest {
                 .then()
                 .statusCode(200);
     }
+
 }
