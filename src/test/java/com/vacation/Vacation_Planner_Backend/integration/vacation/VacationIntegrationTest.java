@@ -329,6 +329,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Story("Отмена отпуска")
     @DisplayName("Отмена своей заявки, возвращает 200")
+    @Severity(SeverityLevel.NORMAL)
     void deleteVacation_ownRequest_returns200() {
         String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
         String inviteCode = createTeamAndGetInviteCode(employer, "delTeam");
@@ -376,6 +377,7 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Story("Ревью отпуска")
     @DisplayName("Одобрение заявки возвращает 200 и статус APPROVED")
+    @Severity(SeverityLevel.NORMAL)
     void reviewVacation_approve_returns200() {
         String employer = register(uniqueEmail(), "CEO", "EMPLOYER");
         String vacationId = createTeamWithVacation(employer, uniqueEmail(), "reviewApproveTeam");
@@ -388,6 +390,26 @@ public class VacationIntegrationTest extends AbstractIntegrationTest {
                         """)
                 .when()
                 .put("/api/vacations/{id}/review", vacationId)
+                .then()
+                .statusCode(200)
+                .body("status", org.hamcrest.Matchers.equalTo("APPROVED"));
+    }
+
+    @Test
+    @Story("Создание отпуска")
+    @DisplayName("Создание заявки работодателем, возвращает 200 и статус APPROVED")
+    @Severity(SeverityLevel.NORMAL)
+    void createVacationByEmployer_returns200() {
+        String employer = register(uniqueEmail(), "Kola", "EMPLOYER");
+        createTeamAndGetInviteCode(employer, "vacationTeam");
+        given()
+                .header("Authorization", "Bearer " + employer)
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"startDate": "2026-08-01", "endDate": "2026-08-10"}
+                        """)
+                .when()
+                .post("/api/vacations")
                 .then()
                 .statusCode(200)
                 .body("status", org.hamcrest.Matchers.equalTo("APPROVED"));

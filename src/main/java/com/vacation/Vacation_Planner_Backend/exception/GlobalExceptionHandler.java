@@ -26,30 +26,22 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", errors);
     }
 
-    // Handle business logic errors (RuntimeException)
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        HttpStatus status = switch (ex.getMessage()) {
-            case "Email already in use" -> HttpStatus.CONFLICT;
-            case "User not found" -> HttpStatus.NOT_FOUND;
-            case "Team not found" -> HttpStatus.NOT_FOUND;
-            case "Invalid invite code" -> HttpStatus.BAD_REQUEST;
-            case "Already a member of this team" -> HttpStatus.CONFLICT;
-            case "You already have a team" -> HttpStatus.CONFLICT;
-            case "Vacation request not found" -> HttpStatus.NOT_FOUND;
-            case "Not enough vacation days" -> HttpStatus.BAD_REQUEST;
-            case "Only pending vacation requests can be cancelled" -> HttpStatus.BAD_REQUEST;
-            case "Notification not found" -> HttpStatus.NOT_FOUND;
-            case "Vacation balance not found" -> HttpStatus.NOT_FOUND;
-            case "User is not in a team" -> HttpStatus.BAD_REQUEST;
-            case "End date cannot be before start date" -> HttpStatus.BAD_REQUEST;
-            case "Invalid status" -> HttpStatus.BAD_REQUEST;
-            case "Vacation request is already reviewed" -> HttpStatus.BAD_REQUEST;
-            case "You are already a member of a team" -> HttpStatus.CONFLICT;
-            default -> HttpStatus.INTERNAL_SERVER_ERROR;
-        };
+    // 409 Conflict
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), null);
+    }
 
-        return buildResponse(status, ex.getMessage(), null);
+    // 404 Not Found
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(NotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null);
+    }
+
+    // 400 Bad Request
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
     // Handle 403 Forbidden
@@ -77,5 +69,11 @@ public class GlobalExceptionHandler {
             body.put("details", details);
         }
         return ResponseEntity.status(status).body(body);
+    }
+
+    // Fallback for unclassified runtime errors
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), null);
     }
 }

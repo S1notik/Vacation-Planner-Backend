@@ -1,11 +1,13 @@
 package com.vacation.Vacation_Planner_Backend.service.impl;
 
 import com.vacation.Vacation_Planner_Backend.dto.notification.response.NotificationResponse;
+import com.vacation.Vacation_Planner_Backend.exception.NotFoundException;
 import com.vacation.Vacation_Planner_Backend.model.entity.Notification;
 import com.vacation.Vacation_Planner_Backend.model.entity.User;
 import com.vacation.Vacation_Planner_Backend.repository.NotificationRepository;
 import com.vacation.Vacation_Planner_Backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +29,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void markAsRead(UUID notificationId, User currentUser) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new NotFoundException("Notification not found"));
 
         // Only owner can mark as read
         if (!notification.getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Access denied");
+            throw new AccessDeniedException("Access denied");
         }
 
         notification.setIsRead(true);

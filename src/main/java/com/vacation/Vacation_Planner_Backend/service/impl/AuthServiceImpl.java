@@ -4,6 +4,9 @@ import com.vacation.Vacation_Planner_Backend.dto.auth.request.LoginRequest;
 import com.vacation.Vacation_Planner_Backend.dto.auth.request.RegisterRequest;
 import com.vacation.Vacation_Planner_Backend.dto.auth.response.LoginResponse;
 import com.vacation.Vacation_Planner_Backend.dto.auth.response.RegisterResponse;
+import com.vacation.Vacation_Planner_Backend.exception.BadRequestException;
+import com.vacation.Vacation_Planner_Backend.exception.ConflictException;
+import com.vacation.Vacation_Planner_Backend.exception.NotFoundException;
 import com.vacation.Vacation_Planner_Backend.model.entity.User;
 import com.vacation.Vacation_Planner_Backend.model.enums.Role;
 import com.vacation.Vacation_Planner_Backend.repository.UserRepository;
@@ -34,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponse register(RegisterRequest request) {
         // Check if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new ConflictException("Email already in use");
         }
         User user = User.builder()
                 .email(request.getEmail())
@@ -60,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
         );
         // Load user from database
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         return new LoginResponse(accessToken, refreshToken, user.getRole().name(), user.getName());
@@ -78,10 +81,10 @@ public class AuthServiceImpl implements AuthService {
         String email = jwtService.extractEmail(refreshToken);
         // Load user from database
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         // Validate refresh token
         if (!jwtService.isTokenValid(refreshToken, user)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new BadRequestException("Invalid refresh token");
         }
         // Generate new access token
         String newAccessToken = jwtService.generateToken(user);
