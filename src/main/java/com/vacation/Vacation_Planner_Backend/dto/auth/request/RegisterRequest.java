@@ -25,4 +25,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Роль обязательна")
     private String role;
+
+    private String jobTitle;
+
 }

@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Epic("Vacation Planner API")
 @Feature("Authentication")
@@ -236,5 +237,33 @@ public class AuthFlowIntegrationTest extends AbstractIntegrationTest {
                 .get("/api/vacations/balance")
                 .then()
                 .statusCode(403);
+    }
+
+    @Test
+    @Story("Регистрация пользователя")
+    @DisplayName("Должность, указанная при регистрации, доступна в профиле")
+    @Severity(SeverityLevel.NORMAL)
+    void register_withJobTitle_savesit() {
+        String email = uniqueEmail();
+        String body = """
+                {"email": "%s", "password": "password123", "name": "Jack", "role": "EMPLOYER",
+                 "jobTitle": "CEO"}
+                """.formatted(email);
+        String token = given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when()
+                .post("/api/auth/register")
+                .then()
+                .statusCode(200)
+                .extract().path("accessToken");
+        String jobTitle = given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/api/users/me")
+                .then()
+                .statusCode(200)
+                .extract().path("jobTitle");
+        assertEquals("CEO", jobTitle);
     }
 }
