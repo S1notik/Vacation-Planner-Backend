@@ -44,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .role(Role.valueOf(request.getRole()))
+                .jobTitle(request.getJobTitle())
                 .build();
         userRepository.save(user);
         // Generate tokens
